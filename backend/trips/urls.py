@@ -1,7 +1,7 @@
 from django.urls import path
 
-from . import views
+from .views import TripsCollectionView
 
 urlpatterns = [
-    path("health/", views.health, name="health"),
+    path("trips/", TripsCollectionView.as_view(), name="trips-collection"),
 ]

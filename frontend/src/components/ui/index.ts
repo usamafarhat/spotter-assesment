@@ -5,3 +5,4 @@ export { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./Car
 export { Input } from "./Input";
 export { Label } from "./Label";
 export { Separator } from "./Separator";
+export { Textarea } from "./Textarea";

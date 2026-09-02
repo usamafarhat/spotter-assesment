@@ -13,11 +13,7 @@ type AlertProps = HTMLAttributes<HTMLDivElement> & {
   variant?: keyof typeof variants;
 };
 
-export function Alert({
-  variant = "default",
-  className,
-  ...props
-}: AlertProps) {
+export function Alert({ variant = "default", className, ...props }: AlertProps) {
   return (
     <div
       role="alert"
@@ -35,9 +31,7 @@ export function AlertTitle({
   className,
   ...props
 }: HTMLAttributes<HTMLParagraphElement>) {
-  return (
-    <p className={cn("mb-1 font-medium leading-none", className)} {...props} />
-  );
+  return <p className={cn("mb-1 font-medium leading-none", className)} {...props} />;
 }
 
 export function AlertDescription({

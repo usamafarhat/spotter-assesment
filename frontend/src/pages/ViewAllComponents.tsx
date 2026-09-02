@@ -130,15 +130,11 @@ export default function ViewAllComponents() {
             </Alert>
             <Alert variant="warning">
               <AlertTitle>Warning</AlertTitle>
-              <AlertDescription>
-                Approaching 70-hour cycle limit.
-              </AlertDescription>
+              <AlertDescription>Approaching 70-hour cycle limit.</AlertDescription>
             </Alert>
             <Alert variant="error">
               <AlertTitle>Error</AlertTitle>
-              <AlertDescription>
-                Could not reach the routing service.
-              </AlertDescription>
+              <AlertDescription>Could not reach the routing service.</AlertDescription>
             </Alert>
           </div>
         </Section>
