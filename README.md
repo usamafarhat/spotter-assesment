@@ -108,11 +108,16 @@ TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
 
 ### Outputs
 
-| Output | Description |
-| ------ | ----------- |
-| **Map** | Route polyline plus markers/info for stops, rests, pickup, dropoff, and fuel stops |
-| **Daily log sheets** | FMCSA-style 24-hour grids with duty status segments (`off_duty`, `sleeper`, `driving`, `on_duty`) for each day of the trip |
-| **Route plan** | Ordered list of driving legs, rests, and stops with timestamps |
+| Output | API field / location | Status |
+| ------ | -------------------- | ------ |
+| **Driving route polyline** | `route_polyline` — `[[lat, lng], ...]` on `Trip` | ✅ On create (OpenRouteService) |
+| **Total distance** | `total_distance_miles` | ✅ On create |
+| **Total drive duration** | `total_duration_hours` (driving time only; HOS rests not yet applied) | ✅ On create |
+| **Map** | Frontend renders polyline + markers | 🔲 Planned |
+| **Daily log sheets** | FMCSA 24h grids with duty segments | 🔲 Planned |
+| **Route plan (HOS)** | Driving legs, rests, fuel stops with timestamps | 🔲 Planned |
+
+**Current create-trip behavior:** `POST /api/trips/` validates input, calls **OpenRouteService** (backend-only) for a truck route along **current → pickup → delivery**, then saves the trip with polyline, miles, and hours. HOS rests and fuel stops are **not** applied yet — that will extend `trips/services/trip_planner.py`.
 
 ---
 
@@ -123,28 +128,52 @@ TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
 │  frontend/  (React + TypeScript + Vite + Tailwind)          │
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐ │
 │  │  TripForm   │  │   MapView    │  │   LogSheetView      │ │
-│  │  (inputs)   │  │ (free map    │  │ (24h ELD grids)     │ │
-│  │             │  │  API)        │  │                     │ │
+│  │  (inputs)   │  │ (Google Maps │  │ (24h ELD grids)     │ │
+│  │             │  │  display)    │  │                     │ │
 │  └──────┬──────┘  └──────▲───────┘  └──────────▲──────────┘ │
 │         │                │                      │            │
 │         └────────────────┼──────────────────────┘            │
-│                          │  REST JSON                        │
+│                          │  REST JSON (POST /api/trips/)     │
 └──────────────────────────┼──────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────┐
 │  backend/  (Django + Django REST Framework)                 │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  HOS / route engine  →  trip plan + duty log segments  │ │
-│  └────────────────────────────────────────────────────────┘ │
+│  views/          → HTTP in/out (thin)                       │
+│  serializers/    → validate request/response shape          │
+│  services/       → business logic                           │
+│    openrouteservice.py  → ORS directions (API key here)     │
+│    trip_planner.py      → plan trip + save Trip             │
+│    (future) hos_engine  → rests, fuel, duty segments        │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ HTTPS (server-side only)
+┌──────────────────────────▼──────────────────────────────────┐
+│  OpenRouteService  — driving-hgv route + polyline           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 | Layer | Responsibility |
 | ----- | -------------- |
-| **Backend** | Geocoding/routing coordination, HOS compliance, trip + log segment generation, persistence |
-| **Frontend** | User input, API calls, map rendering, ELD log sheet UI |
+| **Backend views** | HTTP only: validate → call service → return JSON + status |
+| **Backend services** | Routing (ORS), trip planning, future HOS engine |
+| **Backend serializers** | Input validation; read/write JSON shape |
+| **Frontend** | User input, location picker, API calls, map/log UI |
+| **Google Maps (frontend)** | Search, geocode, map display — **not** used for route distance |
+| **OpenRouteService (backend)** | Truck route polyline, miles, hours — **API key never sent to browser** |
 
 **Dev proxy:** Vite forwards `/api/*` → `http://127.0.0.1:8000` (see `frontend/vite.config.ts`).
+
+### Routing & location notes (for code readers)
+
+| Topic | Where | Behavior |
+| ----- | ----- | -------- |
+| **ORS profile** | `trips/services/openrouteservice.py` | `driving-hgv` (truck) |
+| **Waypoints on create** | `trips/services/trip_planner.py` | current → pickup → delivery |
+| **Snap retry** | `openrouteservice.py` | Attempt 1: 350 m snap; attempt 2: 2 km snap if pins are off-road |
+| **Routing errors** | View catches `OpenRouteServiceError` | Returns `{ "detail": "..." }` with user-facing message (rate limit, snap failure, no route, etc.) |
+| **Frontend location rule** | `frontend/src/lib/googleMaps.ts` | Search rejects city/state-only picks; map tap allows pin on road |
+| **Coordinate precision** | `frontend/src/lib/coordinates.ts` | Lat/lng rounded to 6 decimals before API (matches Django `DecimalField`) |
+
+**Why two map providers?** Google Maps gives a good picker UX; OpenRouteService (free tier) computes the **assessment route** on the backend so the API key stays secret and matches the README “free map API” split (display vs routing).
 
 ---
 
@@ -155,20 +184,23 @@ spotter-assesment/
 ├── README.md                 ← project overview + requirements (this file)
 ├── backend/                  ← Django REST API
 │   ├── eld_planner/          ← Django project settings
-│   ├── trips/                ← main app (models, views, HOS engine)
-│   └── README.md             ← API setup, endpoints, tests
+│   ├── trips/
+│   │   ├── models.py         ← Trip (locations, polyline, HOS fields TBD)
+│   │   ├── views/            ← one URL route → one file (e.g. trips_collection.py)
+│   │   ├── serializers/      ← validate I/O; create serializer has no business logic
+│   │   └── services/         ← ORS client + trip_planner (+ future HOS)
+│   └── README.md             ← API setup, endpoints, routing notes
 └── frontend/                 ← React SPA
     ├── src/
-    │   ├── api/              ← HTTP client & endpoint helpers
+    │   ├── api/EldPlanner/   ← HTTP client, React Query hooks
     │   ├── components/
     │   │   ├── layout/       ← App shell, navigation
-    │   │   ├── trip/         ← Trip input form
-    │   │   ├── map/          ← Route map
-    │   │   └── logs/         ← ELD log sheet rendering
-    │   ├── hooks/            ← React hooks (e.g. useHealth)
+    │   │   ├── trip/         ← Plan trip form + location picker
+    │   │   ├── map/          ← Google Maps picker (display/search)
+    │   │   └── home/         ← Dashboard trip cards
+    │   ├── lib/              ← getErrorMessage, coordinates, tripDisplay
     │   ├── pages/            ← Dashboard, Trip, Logs tabs
     │   └── types/            ← Shared TypeScript types
-    └── README.md             ← dev server, scripts, component notes
 ```
 
 ---
@@ -180,13 +212,19 @@ spotter-assesment/
 | Area | Status | Notes |
 | ---- | ------ | ----- |
 | Health check API | ✅ Done | `GET /api/health/` |
-| Trip CRUD API | 🔲 Planned | `/api/trips/`, `/api/trip-logs/` |
+| Trip list + create API | ✅ Done | `GET/POST /api/trips/` |
+| OpenRouteService routing | ✅ Done | On create: polyline, miles, hours via `trips/services/` |
+| ORS snap retry | ✅ Done | 350 m → 2 km; user-facing errors name failing stop |
+| Trip model | ✅ Done | Locations, `route_polyline`, distance/duration, status |
+| Frontend plan trip form | ✅ Done | Wired to `POST /api/trips/` + error handling |
+| Frontend trip list (home/trips) | ✅ Done | `useTrips()` + skeleton loaders |
+| Frontend API module | ✅ Done | `src/api/EldPlanner/` |
+| Trip detail API | 🔲 Planned | `GET /api/trips/<id>/` |
 | Duty status log model | 🔲 Planned | `off_duty`, `sleeper`, `driving`, `on_duty` |
+| HOS route engine | 🔲 Planned | Rests, fuel stops, cycle tracking in `trip_planner.py` |
+| Map polyline display | 🔲 Planned | Render saved `route_polyline` on Google Map |
+| ELD log sheet rendering | 🔲 Planned | FMCSA 24h grids in Logs tab |
 | Seed demo data | 🔲 Planned | `python manage.py seed_data` |
-| HOS route engine | 🔲 Planned | Rests, fuel stops, cycle tracking |
-| Trip planning UI | 🟡 In progress | Design system + input form styles; API not wired |
-| Map integration | 🔲 Planned | Free map API in `MapView` |
-| ELD log sheet rendering | 🔲 Planned | FMCSA 24h grids in `LogSheetView` |
 | Frontend design system | ✅ Done | UI components, Tailwind theme, tab navigation |
 
 **Legend:** ✅ Done · 🟡 In progress · 🔲 Planned
@@ -207,9 +245,17 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate          # macOS / Linux
 pip install -r requirements.txt
+cp .env.example .env               # set OPENROUTESERVICE_API_KEY (required for create trip)
 python manage.py migrate
 python manage.py runserver         # http://127.0.0.1:8000
 ```
+
+Frontend env (see `frontend/.env.example`):
+
+| Variable | Description |
+| -------- | ----------- |
+| `VITE_GOOGLE_MAPS_API_KEY` | Google Maps (picker/display only) |
+| `VITE_API_BASE_URL` | Defaults to `/api` (Vite proxy to Django) |
 
 Optional (once implemented):
 
@@ -246,7 +292,8 @@ See [frontend/README.md](frontend/README.md) for scripts, component layout, and 
 | **Duty status** | One of: `off_duty`, `sleeper`, `driving`, `on_duty` |
 | **Log sheet** | 24-hour grid showing when each duty status applies |
 | **Cycle** | Rolling window (here: 70 hours in 8 days) tracking total on-duty + driving time |
-| **FMCSA** | Federal Motor Carrier Safety Administration (U.S. trucking regulator) |
+| **Polyline** | Ordered list of `[lat, lng]` points describing the driven path (from ORS) |
+| **OpenRouteService (ORS)** | Backend routing API; computes truck route — not called from frontend |
 
 ---
 

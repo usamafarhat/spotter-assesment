@@ -10,10 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -21,6 +26,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-(g0$!0rm%q(unlcb*#z6dln%tih$p1qj%*0ky+fl1(_-ph3o9z"
+
+# OpenRouteService — used by trips.services.openrouteservice (backend only)
+OPENROUTESERVICE_API_KEY = os.environ.get("OPENROUTESERVICE_API_KEY", "")
+OPENROUTESERVICE_BASE_URL = os.environ.get(
+    "OPENROUTESERVICE_BASE_URL",
+    "https://api.openrouteservice.org",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from ..models import Trip
 from ..serializers import TripCreateSerializer, TripSerializer
+from ..services import OpenRouteServiceError, create_planned_trip
 
 
 class TripsCollectionView(APIView):
@@ -18,7 +19,15 @@ class TripsCollectionView(APIView):
     def post(self, request: Request) -> Response:
         serializer = TripCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        trip = serializer.save()
+
+        try:
+            trip = create_planned_trip(serializer.validated_data)
+        except OpenRouteServiceError as exc:
+            return Response(
+                {"detail": exc.user_message},
+                status=exc.http_status,
+            )
+
         return Response(
             TripSerializer(trip).data,
             status=status.HTTP_201_CREATED,
