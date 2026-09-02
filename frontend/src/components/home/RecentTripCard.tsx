@@ -1,9 +1,9 @@
 import { History, MoreVertical, Truck } from "lucide-react";
+import type { TripListItem } from "@/lib/tripDisplay";
 import { TripStatusBadge } from "../trip/TripStatusBadge";
-import type { DashboardTrip } from "../../data/mockDashboardTrips";
 
 type RecentTripCardProps = {
-  trip: DashboardTrip;
+  trip: TripListItem;
 };
 
 export function RecentTripCard({ trip }: RecentTripCardProps) {

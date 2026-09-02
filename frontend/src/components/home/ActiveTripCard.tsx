@@ -1,10 +1,10 @@
 import { ChevronRight, Route } from "lucide-react";
+import type { TripListItem } from "@/lib/tripDisplay";
 import { TripRouteTimeline } from "./TripRouteTimeline";
 import { TripStatusBadge } from "../trip/TripStatusBadge";
-import type { DashboardTrip } from "../../data/mockDashboardTrips";
 
 type ActiveTripCardProps = {
-  trip: DashboardTrip;
+  trip: TripListItem;
 };
 
 export function ActiveTripCard({ trip }: ActiveTripCardProps) {

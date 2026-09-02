@@ -1,11 +1,11 @@
-import { Form, Formik } from "formik";
+import { Form, Formik, type FormikHelpers } from "formik";
 import { Clock, LocateFixed, MapPin, Package, Route } from "lucide-react";
 import { useState } from "react";
-import { Button } from "../ui/Button";
-import { LocationFieldButton } from "./LocationFieldButton";
-import { LocationPickerSheet } from "./LocationPickerSheet";
-import { CycleHoursField } from "./CycleHoursField";
-import { FormGlobalError } from "./FormGlobalError";
+import { useCreateTrip } from "@/api/EldPlanner/modules/trips";
+import { useNavigation } from "@/context/NavigationContext";
+import { getErrorMessage } from "@/lib/getErrorMessage";
+import { applyTripApiFieldErrors } from "@/lib/tripApiErrors";
+import { toCreateTripDto } from "@/lib/tripFormMapper";
 import {
   CYCLE_FULLY_UTILIZED_ERROR,
   MAX_CYCLE_HRS,
@@ -16,6 +16,14 @@ import {
   type LocationFieldKey,
   type TripFormValues,
 } from "../../types/trip";
+import { Button } from "../ui/Button";
+import { CycleHoursField } from "./CycleHoursField";
+import { FormGlobalError } from "./FormGlobalError";
+import { LocationFieldButton } from "./LocationFieldButton";
+import { LocationPickerSheet } from "./LocationPickerSheet";
+
+const CREATE_TRIP_DEFAULT_ERROR =
+  "Unable to generate trip plan. Please try again.";
 
 const locationFields: {
   key: LocationFieldKey;
@@ -43,22 +51,50 @@ const locationFields: {
   },
 ];
 
+function locationFieldError(error: unknown): string | undefined {
+  return typeof error === "string" ? error : undefined;
+}
+
 export function PlanTripForm() {
+  const { closePlanTrip } = useNavigation();
+  const createTrip = useCreateTrip();
   const [activeLocationField, setActiveLocationField] =
     useState<LocationFieldKey | null>(null);
   const [globalError, setGlobalError] = useState<string | undefined>();
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  function handleSubmit(values: TripFormValues) {
+  async function handleSubmit(
+    values: TripFormValues,
+    { setSubmitting, setFieldError }: FormikHelpers<TripFormValues>,
+  ) {
     const hoursUsed = parseFloat(values.currentCycleUsedHrs);
     if (!Number.isNaN(hoursUsed) && hoursUsed >= MAX_CYCLE_HRS) {
       setGlobalError(CYCLE_FULLY_UTILIZED_ERROR);
+      setSubmitting(false);
       return;
     }
 
     setGlobalError(undefined);
-    // API wiring comes later
-    console.log("Trip form submitted:", values);
+
+    try {
+      await createTrip.mutateAsync(toCreateTripDto(values));
+      closePlanTrip();
+    } catch (error) {
+      setShowValidationErrors(true);
+
+      const { globalError: apiGlobalError, hasFieldErrors } =
+        applyTripApiFieldErrors(error, (field, message) => {
+          void setFieldError(field, message);
+        });
+
+      if (apiGlobalError) {
+        setGlobalError(apiGlobalError);
+      } else if (!hasFieldErrors) {
+        setGlobalError(getErrorMessage(error, CREATE_TRIP_DEFAULT_ERROR));
+      }
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -98,7 +134,7 @@ export function PlanTripForm() {
                       hint={field.hint}
                       value={values[field.key]?.address ?? ""}
                       icon={field.icon}
-                      error={errors[field.key]}
+                      error={locationFieldError(errors[field.key])}
                       showError={showValidationErrors}
                       onClick={() => {
                         setActiveLocationField(field.key);
@@ -140,13 +176,15 @@ export function PlanTripForm() {
                   type="button"
                   size="lg"
                   className="h-12 w-full rounded-xl"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || createTrip.isPending}
                   onClick={async () => {
                     setShowValidationErrors(true);
                     await submitForm();
                   }}
                 >
-                  Generate Plan
+                  {isSubmitting || createTrip.isPending
+                    ? "Generating Plan..."
+                    : "Generate Plan"}
                 </Button>
               </div>
             </div>
