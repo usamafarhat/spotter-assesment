@@ -9,6 +9,7 @@ import {
   formatDurationHours,
   formatRecentTripDateLabel,
 } from "@/lib/tripDisplay";
+import { TripSchedule } from "./TripSchedule";
 import { TripStatusBadge } from "./TripStatusBadge";
 
 type TripDetailViewProps = {
@@ -98,16 +99,28 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
           </p>
         </section>
 
-        <section className="grid grid-cols-3 gap-2">
+        <section className="grid grid-cols-2 gap-2">
           <StatCard label="Distance" value={formatDistanceMiles(trip.total_distance_miles)} />
           <StatCard label="Drive time" value={formatDurationHours(trip.total_duration_hours)} />
+          <StatCard label="Total trip" value={formatDurationHours(trip.total_trip_hours)} />
           <StatCard label="Cycle used" value={formatCycleHours(trip.current_cycle_used_hrs)} />
         </section>
 
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Clock className="size-4 text-muted-foreground" aria-hidden />
-            <h2 className="text-sm font-bold text-foreground">Stops</h2>
+            <h2 className="text-sm font-bold text-foreground">HOS schedule</h2>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Driving, rests, fuel, and on-duty stops in order.
+          </p>
+          <TripSchedule segments={trip.duty_segments ?? []} />
+        </section>
+
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <MapPin className="size-4 text-muted-foreground" aria-hidden />
+            <h2 className="text-sm font-bold text-foreground">Locations</h2>
           </div>
 
           <ol className="space-y-0">
@@ -188,10 +201,16 @@ export function TripDetailSkeleton({ onBack }: { onBack: () => void }) {
           <Skeleton className="h-6 w-4/5" />
           <Skeleton className="h-4 w-32" />
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <Skeleton className="h-16 rounded-2xl" />
           <Skeleton className="h-16 rounded-2xl" />
           <Skeleton className="h-16 rounded-2xl" />
+          <Skeleton className="h-16 rounded-2xl" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
         </div>
       </div>
     </div>

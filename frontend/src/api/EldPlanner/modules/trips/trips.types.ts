@@ -1,4 +1,8 @@
+import type { DutySegmentDto } from "./dutySegment.types";
+
 export type TripStatus = "planned" | "in_progress" | "completed" | "cancelled";
+
+export type { DutySegmentDto, DutyStatus, StopType } from "./dutySegment.types";
 
 export interface LocationDto {
   address: string;
@@ -16,8 +20,10 @@ export interface TripResponseDto {
   current_cycle_used_hrs: string;
   total_distance_miles: string | null;
   total_duration_hours: string | null;
+  total_trip_hours: string | null;
   route_to_pickup_polyline: RoutePolyline | null;
   route_to_delivery_polyline: RoutePolyline | null;
+  duty_segments: DutySegmentDto[];
   status: TripStatus;
   started_at: string | null;
   completed_at: string | null;
