@@ -1,10 +1,10 @@
 """
 Trip planning orchestration (backend-only).
 
-Two route legs from OpenRouteService:
-  current → pickup, then pickup → delivery.
-
-Skips an ORS call when a leg has no distance (same location).
+Flow:
+  1. Fetch up to two ORS legs (current→pickup, pickup→delivery)
+  2. Build HOS schedule from exact leg miles/hours
+  3. Save Trip + DutySegment rows
 """
 
 from __future__ import annotations
@@ -12,7 +12,11 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from ..models import Trip
+from django.db import transaction
+from django.utils import timezone
+
+from ..models import DutySegment, Trip
+from .hos import build_hos_plan
 from .openrouteservice import RouteResult, get_driving_route
 
 COORD_EPSILON = 0.0001
@@ -20,6 +24,12 @@ COORD_EPSILON = 0.0001
 
 def _as_float(value: Any) -> float:
     return float(value)
+
+
+def _optional_decimal(value: float | None, *, places: int = 1) -> Decimal | None:
+    if value is None:
+        return None
+    return Decimal(str(round(value, places)))
 
 
 def _coords_match(
@@ -57,17 +67,19 @@ def _fetch_leg(
     )
 
 
+@transaction.atomic
 def create_planned_trip(validated_data: dict[str, Any]) -> Trip:
     """
-    Create a planned trip with up to two ORS route legs.
+    Create a planned trip with ORS routes + HOS duty schedule.
 
-    When pickup is the same as current, leg 1 is skipped (no ORS call).
+    When pickup equals current, leg 1 skips ORS (0 mi / 0 hr).
     Raises OpenRouteServiceError when routing fails.
     """
     current = validated_data["current_location"]
     pickup = validated_data["pickup_location"]
     delivery = validated_data["delivery_location"]
     pickup_same_as_current = validated_data.get("pickup_same_as_current", False)
+    trip_start = timezone.now()
 
     current_coords = (
         _as_float(current["latitude"]),
@@ -107,7 +119,18 @@ def create_planned_trip(validated_data: dict[str, Any]) -> Trip:
     total_distance_miles = leg_to_pickup.distance_miles + leg_to_delivery.distance_miles
     total_duration_hours = leg_to_pickup.duration_hours + leg_to_delivery.duration_hours
 
-    return Trip.objects.create(
+    hos_plan = build_hos_plan(
+        leg_to_pickup_miles=float(leg_to_pickup.distance_miles),
+        leg_to_pickup_hours=float(leg_to_pickup.duration_hours),
+        leg_to_delivery_miles=float(leg_to_delivery.distance_miles),
+        leg_to_delivery_hours=float(leg_to_delivery.duration_hours),
+        route_to_pickup_polyline=leg_to_pickup.polyline,
+        route_to_delivery_polyline=leg_to_delivery.polyline,
+        current_cycle_used_hrs=float(validated_data["current_cycle_used_hrs"]),
+        trip_start=trip_start,
+    )
+
+    trip = Trip.objects.create(
         current_address=current["address"],
         current_latitude=current["latitude"],
         current_longitude=current["longitude"],
@@ -122,6 +145,28 @@ def create_planned_trip(validated_data: dict[str, Any]) -> Trip:
         status=Trip.Status.PLANNED,
         total_distance_miles=total_distance_miles,
         total_duration_hours=total_duration_hours,
+        total_trip_hours=hos_plan.total_trip_hours,
         route_to_pickup_polyline=leg_to_pickup.polyline,
         route_to_delivery_polyline=leg_to_delivery.polyline,
+        started_at=hos_plan.trip_start,
     )
+
+    DutySegment.objects.bulk_create(
+        [
+            DutySegment(
+                trip=trip,
+                sequence=index,
+                duty_status=segment.duty_status,
+                stop_type=segment.stop_type,
+                started_at=segment.started_at,
+                ended_at=segment.ended_at,
+                miles_at_start=_optional_decimal(segment.miles_at_start),
+                miles_at_end=_optional_decimal(segment.miles_at_end),
+                latitude=_optional_decimal(segment.latitude, places=6),
+                longitude=_optional_decimal(segment.longitude, places=6),
+            )
+            for index, segment in enumerate(hos_plan.segments)
+        ]
+    )
+
+    return trip
