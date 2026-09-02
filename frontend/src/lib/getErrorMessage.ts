@@ -103,10 +103,7 @@ export function isApiError(error: unknown): error is ApiError {
  * Supports DRF defaults (`detail`, nested field errors, `non_field_errors`)
  * and a future `{ error: { message, fields } }` envelope.
  */
-export function getErrorMessage(
-  error: unknown,
-  defaultMessage: string,
-): string {
+export function getErrorMessage(error: unknown, defaultMessage: string): string {
   const fromPayload = collectErrorMessages(extractResponseData(error));
   if (fromPayload.length > 0) {
     return fromPayload[0];

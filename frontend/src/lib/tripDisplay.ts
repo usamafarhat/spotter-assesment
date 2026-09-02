@@ -26,10 +26,7 @@ export function toTripListItem(trip: TripResponseDto): TripListItem {
   };
 }
 
-export function getRecentTrips(
-  trips: TripResponseDto[],
-  limit = 3,
-): TripListItem[] {
+export function getRecentTrips(trips: TripResponseDto[], limit = 3): TripListItem[] {
   return trips.slice(0, limit).map((trip) => toTripListItem(trip));
 }
 

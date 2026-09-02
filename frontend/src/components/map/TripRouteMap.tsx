@@ -1,7 +1,10 @@
 import { GoogleMap, Marker, Polyline } from "@react-google-maps/api";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import type { LocationDto, RoutePolyline } from "@/api/EldPlanner/modules/trips/trips.types";
+import type {
+  LocationDto,
+  RoutePolyline,
+} from "@/api/EldPlanner/modules/trips/trips.types";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { cn } from "@/lib/cn";
 import {
@@ -88,18 +91,13 @@ export function TripRouteMap({
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const pickupPath = useMemo(
-    () =>
-      routeToPickupPolyline?.length
-        ? polylineToPath(routeToPickupPolyline)
-        : [],
+    () => (routeToPickupPolyline?.length ? polylineToPath(routeToPickupPolyline) : []),
     [routeToPickupPolyline],
   );
 
   const deliveryPath = useMemo(
     () =>
-      routeToDeliveryPolyline?.length
-        ? polylineToPath(routeToDeliveryPolyline)
-        : [],
+      routeToDeliveryPolyline?.length ? polylineToPath(routeToDeliveryPolyline) : [],
     [routeToDeliveryPolyline],
   );
 

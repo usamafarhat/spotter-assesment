@@ -1,4 +1,7 @@
-import type { LocationDto, RoutePolyline } from "@/api/EldPlanner/modules/trips/trips.types";
+import type {
+  LocationDto,
+  RoutePolyline,
+} from "@/api/EldPlanner/modules/trips/trips.types";
 
 export type LatLng = {
   lat: number;

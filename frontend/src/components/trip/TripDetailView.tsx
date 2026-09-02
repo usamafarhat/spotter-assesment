@@ -1,8 +1,20 @@
-import { ArrowLeft, Clock, LocateFixed, MapPin, Package, Route } from "lucide-react";
-import type { LocationDto, TripResponseDto } from "@/api/EldPlanner/modules/trips/trips.types";
+import {
+  ArrowLeft,
+  Clock,
+  FileText,
+  LocateFixed,
+  MapPin,
+  Package,
+  Route,
+} from "lucide-react";
+import type {
+  LocationDto,
+  TripResponseDto,
+} from "@/api/EldPlanner/modules/trips/trips.types";
 import { TripRouteMap } from "@/components/map/TripRouteMap";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useNavigation } from "@/context/NavigationContext";
 import {
   formatCycleHours,
   formatDistanceMiles,
@@ -26,6 +38,8 @@ type StopRow = {
 };
 
 export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
+  const { openLogsForTrip } = useNavigation();
+  const hasDutySegments = (trip.duty_segments?.length ?? 0) > 0;
   const hasRoute = Boolean(
     trip.route_to_pickup_polyline?.length || trip.route_to_delivery_polyline?.length,
   );
@@ -100,10 +114,22 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
         </section>
 
         <section className="grid grid-cols-2 gap-2">
-          <StatCard label="Distance" value={formatDistanceMiles(trip.total_distance_miles)} />
-          <StatCard label="Drive time" value={formatDurationHours(trip.total_duration_hours)} />
-          <StatCard label="Total trip" value={formatDurationHours(trip.total_trip_hours)} />
-          <StatCard label="Cycle used" value={formatCycleHours(trip.current_cycle_used_hrs)} />
+          <StatCard
+            label="Distance"
+            value={formatDistanceMiles(trip.total_distance_miles)}
+          />
+          <StatCard
+            label="Drive time"
+            value={formatDurationHours(trip.total_duration_hours)}
+          />
+          <StatCard
+            label="Total trip"
+            value={formatDurationHours(trip.total_trip_hours)}
+          />
+          <StatCard
+            label="Cycle used"
+            value={formatCycleHours(trip.current_cycle_used_hrs)}
+          />
         </section>
 
         <section className="space-y-3">
@@ -115,6 +141,18 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
             Driving, rests, fuel, and on-duty stops in order.
           </p>
           <TripSchedule segments={trip.duty_segments ?? []} />
+          {hasDutySegments ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full rounded-xl"
+              onClick={() => openLogsForTrip(trip.id)}
+            >
+              <FileText className="size-4" aria-hidden />
+              View ELD logs
+            </Button>
+          ) : null}
         </section>
 
         <section className="space-y-3">
@@ -136,7 +174,9 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
                     >
                       <Icon className="size-3.5" aria-hidden />
                     </span>
-                    {!isLast && <span className="min-h-6 w-px flex-1 bg-border" aria-hidden />}
+                    {!isLast && (
+                      <span className="min-h-6 w-px flex-1 bg-border" aria-hidden />
+                    )}
                   </div>
                   <div className={isLast ? "pb-0 pt-1" : "pb-4 pt-1"}>
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -195,7 +235,11 @@ export function TripDetailSkeleton({ onBack }: { onBack: () => void }) {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-5 px-5 pt-5" aria-busy="true" aria-label="Loading trip">
+      <div
+        className="flex flex-1 flex-col gap-5 px-5 pt-5"
+        aria-busy="true"
+        aria-label="Loading trip"
+      >
         <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
         <div className="space-y-2">
           <Skeleton className="h-6 w-4/5" />

@@ -24,10 +24,7 @@ export function TripSchedule({ segments }: TripScheduleProps) {
   return (
     <ol className="space-y-2">
       {ordered.map((segment) => (
-        <li
-          key={segment.id}
-          className="rounded-2xl border border-border bg-card p-3.5"
-        >
+        <li key={segment.id} className="rounded-2xl border border-border bg-card p-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <span

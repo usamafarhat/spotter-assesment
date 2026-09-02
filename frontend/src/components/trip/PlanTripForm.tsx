@@ -24,8 +24,7 @@ import { LocationFieldButton } from "./LocationFieldButton";
 import { LocationPickerSheet } from "./LocationPickerSheet";
 import { cn } from "@/lib/cn";
 
-const CREATE_TRIP_DEFAULT_ERROR =
-  "Unable to generate trip plan. Please try again.";
+const CREATE_TRIP_DEFAULT_ERROR = "Unable to generate trip plan. Please try again.";
 
 function locationFieldError(error: unknown): string | undefined {
   return typeof error === "string" ? error : undefined;
@@ -58,10 +57,12 @@ export function PlanTripForm() {
     } catch (error) {
       setShowValidationErrors(true);
 
-      const { globalError: apiGlobalError, hasFieldErrors } =
-        applyTripApiFieldErrors(error, (field, message) => {
+      const { globalError: apiGlobalError, hasFieldErrors } = applyTripApiFieldErrors(
+        error,
+        (field, message) => {
           void setFieldError(field, message);
-        });
+        },
+      );
 
       if (apiGlobalError) {
         setGlobalError(apiGlobalError);
@@ -123,7 +124,9 @@ export function PlanTripForm() {
                 <section className="space-y-4">
                   <div className="flex items-center gap-2 border-b border-border pb-3">
                     <Route className="size-5 text-foreground" aria-hidden />
-                    <h2 className="text-base font-bold text-foreground">Route Details</h2>
+                    <h2 className="text-base font-bold text-foreground">
+                      Route Details
+                    </h2>
                   </div>
 
                   <div className="space-y-4">
@@ -167,7 +170,10 @@ export function PlanTripForm() {
                             setGlobalError(undefined);
 
                             if (checked && values.currentLocation) {
-                              void setFieldValue("pickupLocation", values.currentLocation);
+                              void setFieldValue(
+                                "pickupLocation",
+                                values.currentLocation,
+                              );
                             }
                           }}
                         />
@@ -244,9 +250,7 @@ export function PlanTripForm() {
             <LocationPickerSheet
               open={activeLocationField !== null}
               field={activeLocationField}
-              initialValue={
-                activeLocationField ? values[activeLocationField] : null
-              }
+              initialValue={activeLocationField ? values[activeLocationField] : null}
               onClose={() => setActiveLocationField(null)}
               onConfirm={(location) => {
                 if (activeLocationField) {

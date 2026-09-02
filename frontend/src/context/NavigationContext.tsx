@@ -13,11 +13,14 @@ type NavigationContextValue = {
   activeTab: AppTab;
   isPlanTripOpen: boolean;
   selectedTripId: number | null;
+  selectedLogsTripId: number | null;
   navigateToTab: (tab: AppTab) => void;
   openPlanTrip: () => void;
   closePlanTrip: () => void;
   openTripDetail: (tripId: number) => void;
   closeTripDetail: () => void;
+  openLogsForTrip: (tripId: number) => void;
+  setSelectedLogsTripId: (tripId: number | null) => void;
 };
 
 const NavigationContext = createContext<NavigationContextValue | null>(null);
@@ -32,6 +35,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
+  const [selectedLogsTripId, setSelectedLogsTripId] = useState<number | null>(null);
 
   const activeTab = getActiveTab(location.pathname);
   const isPlanTripOpen = location.pathname === PLAN_TRIP_PATH;
@@ -67,26 +71,39 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     [navigate],
   );
 
+  const openLogsForTrip = useCallback(
+    (tripId: number) => {
+      setSelectedLogsTripId(tripId);
+      navigate(TAB_PATHS.logs);
+    },
+    [navigate],
+  );
+
   const value = useMemo(
     () => ({
       activeTab,
       isPlanTripOpen,
       selectedTripId,
+      selectedLogsTripId,
       navigateToTab,
       openPlanTrip,
       closePlanTrip,
       openTripDetail,
       closeTripDetail,
+      openLogsForTrip,
+      setSelectedLogsTripId,
     }),
     [
       activeTab,
       isPlanTripOpen,
       selectedTripId,
+      selectedLogsTripId,
       navigateToTab,
       openPlanTrip,
       closePlanTrip,
       openTripDetail,
       closeTripDetail,
+      openLogsForTrip,
     ],
   );
 

@@ -64,7 +64,12 @@ export default function TripsPage() {
             <AlertTitle>Could not load trips</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
               <span>{getErrorMessage(error, LOAD_ERROR_MESSAGE)}</span>
-              <Button type="button" variant="outline" size="sm" onClick={() => refetch()}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+              >
                 Retry
               </Button>
             </AlertDescription>
