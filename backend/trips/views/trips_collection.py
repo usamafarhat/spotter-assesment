@@ -12,7 +12,7 @@ class TripsCollectionView(APIView):
     """GET /api/trips/ — list trips. POST /api/trips/ — create trip."""
 
     def get(self, request: Request) -> Response:
-        trips = Trip.objects.all()
+        trips = Trip.objects.prefetch_related("duty_segments")
         serializer = TripSerializer(trips, many=True)
         return Response(serializer.data)
 
@@ -27,6 +27,8 @@ class TripsCollectionView(APIView):
                 {"detail": exc.user_message},
                 status=exc.http_status,
             )
+
+        trip = Trip.objects.prefetch_related("duty_segments").get(pk=trip.pk)
 
         return Response(
             TripSerializer(trip).data,

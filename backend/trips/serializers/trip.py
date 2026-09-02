@@ -2,12 +2,14 @@ from rest_framework import serializers
 
 from ..models import Trip
 from .common import serialize_location
+from .duty_segment import DutySegmentSerializer
 
 
 class TripSerializer(serializers.ModelSerializer):
     current_location = serializers.SerializerMethodField()
     pickup_location = serializers.SerializerMethodField()
     delivery_location = serializers.SerializerMethodField()
+    duty_segments = DutySegmentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Trip
@@ -19,7 +21,9 @@ class TripSerializer(serializers.ModelSerializer):
             "current_cycle_used_hrs",
             "total_distance_miles",
             "total_duration_hours",
+            "total_trip_hours",
             "route_polyline",
+            "duty_segments",
             "status",
             "started_at",
             "completed_at",
