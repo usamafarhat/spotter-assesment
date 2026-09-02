@@ -25,7 +25,9 @@ type StopRow = {
 };
 
 export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
-  const hasRoute = Boolean(trip.route_polyline?.length);
+  const hasRoute = Boolean(
+    trip.route_to_pickup_polyline?.length || trip.route_to_delivery_polyline?.length,
+  );
   const stops: StopRow[] = [
     {
       key: "current",
@@ -71,7 +73,8 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
       <div className="flex flex-1 flex-col gap-5 px-5 pt-5 pb-6">
         {hasRoute ? (
           <TripRouteMap
-            polyline={trip.route_polyline}
+            routeToPickupPolyline={trip.route_to_pickup_polyline}
+            routeToDeliveryPolyline={trip.route_to_delivery_polyline}
             currentLocation={trip.current_location}
             pickupLocation={trip.pickup_location}
             deliveryLocation={trip.delivery_location}

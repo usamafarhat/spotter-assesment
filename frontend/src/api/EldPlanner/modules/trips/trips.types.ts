@@ -16,7 +16,8 @@ export interface TripResponseDto {
   current_cycle_used_hrs: string;
   total_distance_miles: string | null;
   total_duration_hours: string | null;
-  route_polyline: RoutePolyline | null;
+  route_to_pickup_polyline: RoutePolyline | null;
+  route_to_delivery_polyline: RoutePolyline | null;
   status: TripStatus;
   started_at: string | null;
   completed_at: string | null;
@@ -29,6 +30,7 @@ export interface CreateTripDto {
   current_location: LocationDto;
   pickup_location: LocationDto;
   delivery_location: LocationDto;
+  pickup_same_as_current?: boolean;
   current_cycle_used_hrs: string | number;
   notes?: string;
 }

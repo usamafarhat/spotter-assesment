@@ -7,6 +7,8 @@ import { cn } from "@/lib/cn";
 import {
   buildTripRouteMarkers,
   createRouteMarkerIcon,
+  hasRoutePolylines,
+  mergeRoutePolylines,
   polylineToPath,
   type RouteMapMarker,
 } from "@/lib/routePolyline";
@@ -24,15 +26,23 @@ const mapOptions: google.maps.MapOptions = {
   gestureHandling: "greedy",
 };
 
-const polylineOptions: google.maps.PolylineOptions = {
-  strokeColor: "#000000",
+const pickupLegPolylineOptions: google.maps.PolylineOptions = {
+  strokeColor: "#2563eb",
+  strokeOpacity: 0.85,
+  strokeWeight: 4,
+  geodesic: true,
+};
+
+const deliveryLegPolylineOptions: google.maps.PolylineOptions = {
+  strokeColor: "#111827",
   strokeOpacity: 0.9,
   strokeWeight: 4,
   geodesic: true,
 };
 
 type TripRouteMapProps = {
-  polyline?: RoutePolyline | null;
+  routeToPickupPolyline?: RoutePolyline | null;
+  routeToDeliveryPolyline?: RoutePolyline | null;
   currentLocation?: LocationDto;
   pickupLocation?: LocationDto;
   deliveryLocation?: LocationDto;
@@ -42,26 +52,32 @@ type TripRouteMapProps = {
 
 function fitMapToRoute(
   map: google.maps.Map,
-  path: google.maps.LatLngLiteral[],
+  paths: google.maps.LatLngLiteral[][],
   extraMarkers: RouteMapMarker[],
 ) {
-  if (!path.length) {
-    return;
+  const bounds = new google.maps.LatLngBounds();
+  let hasPoints = false;
+
+  for (const path of paths) {
+    for (const point of path) {
+      bounds.extend(point);
+      hasPoints = true;
+    }
   }
 
-  const bounds = new google.maps.LatLngBounds();
-  for (const point of path) {
-    bounds.extend(point);
-  }
   for (const marker of extraMarkers) {
     bounds.extend(marker);
+    hasPoints = true;
   }
 
-  map.fitBounds(bounds, { top: 48, right: 48, bottom: 48, left: 48 });
+  if (hasPoints) {
+    map.fitBounds(bounds, { top: 48, right: 48, bottom: 48, left: 48 });
+  }
 }
 
 export function TripRouteMap({
-  polyline,
+  routeToPickupPolyline,
+  routeToDeliveryPolyline,
   currentLocation,
   pickupLocation,
   deliveryLocation,
@@ -71,9 +87,28 @@ export function TripRouteMap({
   const { isLoaded, loadError } = useGoogleMaps();
   const mapRef = useRef<google.maps.Map | null>(null);
 
-  const path = useMemo(
-    () => (polyline?.length ? polylineToPath(polyline) : []),
-    [polyline],
+  const pickupPath = useMemo(
+    () =>
+      routeToPickupPolyline?.length
+        ? polylineToPath(routeToPickupPolyline)
+        : [],
+    [routeToPickupPolyline],
+  );
+
+  const deliveryPath = useMemo(
+    () =>
+      routeToDeliveryPolyline?.length
+        ? polylineToPath(routeToDeliveryPolyline)
+        : [],
+    [routeToDeliveryPolyline],
+  );
+
+  const combinedPath = useMemo(
+    () =>
+      polylineToPath(
+        mergeRoutePolylines(routeToPickupPolyline, routeToDeliveryPolyline),
+      ),
+    [routeToPickupPolyline, routeToDeliveryPolyline],
   );
 
   const routeMarkers = useMemo(() => {
@@ -95,23 +130,33 @@ export function TripRouteMap({
     ]);
   }, [isLoaded]);
 
-  const initialCenter = path[0] ?? DEFAULT_MAP_CENTER;
+  const initialCenter = combinedPath[0] ?? DEFAULT_MAP_CENTER;
+  const showPickupLeg = pickupPath.length > 0;
+  const showDeliveryLeg = deliveryPath.length > 0;
 
   const handleMapLoad = useCallback(
     (map: google.maps.Map) => {
       mapRef.current = map;
-      fitMapToRoute(map, path, routeMarkers);
+      fitMapToRoute(
+        map,
+        [pickupPath, deliveryPath].filter((path) => path.length),
+        routeMarkers,
+      );
     },
-    [path, routeMarkers],
+    [pickupPath, deliveryPath, routeMarkers],
   );
 
   useEffect(() => {
-    if (mapRef.current && path.length) {
-      fitMapToRoute(mapRef.current, path, routeMarkers);
+    if (mapRef.current) {
+      fitMapToRoute(
+        mapRef.current,
+        [pickupPath, deliveryPath].filter((path) => path.length),
+        routeMarkers,
+      );
     }
-  }, [path, routeMarkers]);
+  }, [pickupPath, deliveryPath, routeMarkers]);
 
-  if (!polyline?.length) {
+  if (!hasRoutePolylines(routeToPickupPolyline, routeToDeliveryPolyline)) {
     return null;
   }
 
@@ -144,7 +189,12 @@ export function TripRouteMap({
             options={mapOptions}
             onLoad={handleMapLoad}
           >
-            <Polyline path={path} options={polylineOptions} />
+            {showPickupLeg && (
+              <Polyline path={pickupPath} options={pickupLegPolylineOptions} />
+            )}
+            {showDeliveryLeg && (
+              <Polyline path={deliveryPath} options={deliveryLegPolylineOptions} />
+            )}
 
             {routeMarkers.map((marker) => (
               <Marker
@@ -178,6 +228,24 @@ export function TripRouteMap({
               />
               Destination
             </span>
+            {showPickupLeg && showDeliveryLeg ? (
+              <>
+                <span className="flex items-center gap-1">
+                  <span
+                    className="inline-block h-0.5 w-3 rounded bg-info"
+                    aria-hidden
+                  />
+                  To pickup
+                </span>
+                <span className="flex items-center gap-1">
+                  <span
+                    className="inline-block h-0.5 w-3 rounded bg-foreground"
+                    aria-hidden
+                  />
+                  To delivery
+                </span>
+              </>
+            ) : null}
           </div>
         </>
       )}

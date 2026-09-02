@@ -45,7 +45,7 @@ class RouteResult:
 
     distance_miles: Decimal
     duration_hours: Decimal
-    # [[lat, lng], ...] — matches Trip.route_polyline storage
+    # [[lat, lng], ...] — stored on Trip.route_to_*_polyline
     polyline: list[list[float]]
 
 

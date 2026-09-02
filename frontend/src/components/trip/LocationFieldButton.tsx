@@ -9,6 +9,7 @@ type LocationFieldButtonProps = {
   icon: LucideIcon;
   error?: string;
   showError?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 };
 
@@ -19,6 +20,7 @@ export function LocationFieldButton({
   icon: Icon,
   error,
   showError = false,
+  disabled = false,
   onClick,
 }: LocationFieldButtonProps) {
   const hasError = showError && Boolean(error);
@@ -29,13 +31,17 @@ export function LocationFieldButton({
       <button
         type="button"
         onClick={onClick}
+        disabled={disabled}
         aria-invalid={hasError}
         className={cn(
           "flex h-10 w-full items-center gap-2 rounded-lg border bg-background px-3 text-left text-sm shadow-sm transition-colors",
-          "hover:border-muted-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          hasError
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          disabled
+            ? "cursor-not-allowed border-input opacity-60"
+            : "hover:border-muted-foreground/40 focus-visible:ring-ring",
+          hasError && !disabled
             ? "border-error focus-visible:ring-error/30"
-            : "border-input focus-visible:ring-ring",
+            : !disabled && "border-input",
         )}
       >
         <Icon

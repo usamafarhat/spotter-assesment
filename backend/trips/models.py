@@ -47,10 +47,15 @@ class Trip(BaseModel):
         blank=True,
         help_text="Calendar hours from trip start to end (includes rests and stops).",
     )
-    route_polyline = models.JSONField(
+    route_to_pickup_polyline = models.JSONField(
         null=True,
         blank=True,
-        help_text="Route path as [[lat, lng], ...]",
+        help_text="Route from current location to pickup as [[lat, lng], ...].",
+    )
+    route_to_delivery_polyline = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Route from pickup to delivery as [[lat, lng], ...].",
     )
 
     # Lifecycle

@@ -14,6 +14,7 @@ export type TripFormValues = {
   currentLocation: SelectedLocation | null;
   pickupLocation: SelectedLocation | null;
   dropoffLocation: SelectedLocation | null;
+  pickupSameAsCurrent: boolean;
   currentCycleUsedHrs: string;
 };
 
@@ -21,5 +22,6 @@ export const emptyTripFormValues: TripFormValues = {
   currentLocation: null,
   pickupLocation: null,
   dropoffLocation: null,
+  pickupSameAsCurrent: false,
   currentCycleUsedHrs: "",
 };

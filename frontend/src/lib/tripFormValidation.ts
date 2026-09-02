@@ -14,10 +14,15 @@ export const tripFormSchema = Yup.object({
     .required("Current location is required"),
   pickupLocation: Yup.object(locationShape)
     .nullable()
-    .required("Pickup location is required"),
+    .when("pickupSameAsCurrent", {
+      is: true,
+      then: (schema) => schema.notRequired(),
+      otherwise: (schema) => schema.required("Pickup location is required"),
+    }),
   dropoffLocation: Yup.object(locationShape)
     .nullable()
     .required("Dropoff location is required"),
+  pickupSameAsCurrent: Yup.boolean().required(),
   currentCycleUsedHrs: Yup.number()
     .transform((value, originalValue) =>
       originalValue === "" || originalValue === null ? undefined : value,

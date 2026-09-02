@@ -36,6 +36,40 @@ export function polylineToPath(polyline: RoutePolyline): LatLng[] {
   }));
 }
 
+/** Join pickup + delivery legs for map bounds (skips duplicate join point). */
+export function mergeRoutePolylines(
+  toPickup?: RoutePolyline | null,
+  toDelivery?: RoutePolyline | null,
+): RoutePolyline {
+  const leg1 = toPickup ?? [];
+  const leg2 = toDelivery ?? [];
+
+  if (!leg1.length) {
+    return leg2;
+  }
+  if (!leg2.length) {
+    return leg1;
+  }
+
+  const merged: RoutePolyline = [...leg1];
+  const [lastLat, lastLng] = leg1[leg1.length - 1];
+  const [firstLat, firstLng] = leg2[0];
+  const startIndex =
+    Math.abs(lastLat - firstLat) < 0.0001 && Math.abs(lastLng - firstLng) < 0.0001
+      ? 1
+      : 0;
+
+  merged.push(...leg2.slice(startIndex));
+  return merged;
+}
+
+export function hasRoutePolylines(
+  toPickup?: RoutePolyline | null,
+  toDelivery?: RoutePolyline | null,
+): boolean {
+  return Boolean(toPickup?.length || toDelivery?.length);
+}
+
 export function locationDtoToLatLng(location: LocationDto): LatLng {
   return {
     lat: Number(location.latitude),
