@@ -1,9 +1,10 @@
+import { useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useTrips } from "@/api/EldPlanner/modules/trips";
-import { TripRouteMap } from "@/components/map/TripRouteMap";
 import { RecentTripCard } from "@/components/home/RecentTripCard";
 import { RecentTripCardSkeleton } from "@/components/home/RecentTripCardSkeleton";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { TripDetailSkeleton, TripDetailView } from "@/components/trip/TripDetailView";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { useNavigation } from "@/context/NavigationContext";
@@ -13,11 +14,32 @@ import { toTripListItem } from "@/lib/tripDisplay";
 const LOAD_ERROR_MESSAGE = "Unable to load trips. Please try again.";
 
 export default function TripsPage() {
-  const { openPlanTrip } = useNavigation();
+  const { openPlanTrip, selectedTripId, closeTripDetail } = useNavigation();
   const { data: trips = [], isLoading, isError, error, refetch } = useTrips();
 
   const tripItems = trips.map((trip) => toTripListItem(trip));
-  const featuredTrip = trips.find((trip) => trip.route_polyline?.length);
+  const selectedTrip =
+    selectedTripId == null
+      ? undefined
+      : trips.find((trip) => trip.id === selectedTripId);
+
+  useEffect(() => {
+    if (selectedTripId == null || isLoading) {
+      return;
+    }
+    if (!trips.some((trip) => trip.id === selectedTripId)) {
+      closeTripDetail();
+    }
+  }, [selectedTripId, isLoading, trips, closeTripDetail]);
+
+  if (selectedTripId != null) {
+    if (selectedTrip) {
+      return <TripDetailView trip={selectedTrip} onBack={closeTripDetail} />;
+    }
+    if (isLoading) {
+      return <TripDetailSkeleton onBack={closeTripDetail} />;
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col pb-4">
@@ -50,15 +72,6 @@ export default function TripsPage() {
         )}
 
         <section className="space-y-3">
-          {featuredTrip && (
-            <TripRouteMap
-              polyline={featuredTrip.route_polyline}
-              currentLocation={featuredTrip.current_location}
-              pickupLocation={featuredTrip.pickup_location}
-              deliveryLocation={featuredTrip.delivery_location}
-            />
-          )}
-
           {isLoading ? (
             Array.from({ length: 4 }).map((_, index) => (
               <RecentTripCardSkeleton key={index} />

@@ -56,7 +56,7 @@ function locationFieldError(error: unknown): string | undefined {
 }
 
 export function PlanTripForm() {
-  const { closePlanTrip } = useNavigation();
+  const { openTripDetail } = useNavigation();
   const createTrip = useCreateTrip();
   const [activeLocationField, setActiveLocationField] =
     useState<LocationFieldKey | null>(null);
@@ -77,8 +77,8 @@ export function PlanTripForm() {
     setGlobalError(undefined);
 
     try {
-      await createTrip.mutateAsync(toCreateTripDto(values));
-      closePlanTrip();
+      const created = await createTrip.mutateAsync(toCreateTripDto(values));
+      openTripDetail(created.id);
     } catch (error) {
       setShowValidationErrors(true);
 

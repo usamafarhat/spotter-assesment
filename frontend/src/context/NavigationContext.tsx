@@ -1,13 +1,23 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PLAN_TRIP_PATH, TAB_PATHS, type AppTab } from "../types/navigation";
 
 type NavigationContextValue = {
   activeTab: AppTab;
   isPlanTripOpen: boolean;
+  selectedTripId: number | null;
   navigateToTab: (tab: AppTab) => void;
   openPlanTrip: () => void;
   closePlanTrip: () => void;
+  openTripDetail: (tripId: number) => void;
+  closeTripDetail: () => void;
 };
 
 const NavigationContext = createContext<NavigationContextValue | null>(null);
@@ -21,18 +31,27 @@ function getActiveTab(pathname: string): AppTab {
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
 
   const activeTab = getActiveTab(location.pathname);
   const isPlanTripOpen = location.pathname === PLAN_TRIP_PATH;
 
+  const closeTripDetail = useCallback(() => {
+    setSelectedTripId(null);
+  }, []);
+
   const navigateToTab = useCallback(
     (tab: AppTab) => {
+      if (tab === "trips") {
+        setSelectedTripId(null);
+      }
       navigate(TAB_PATHS[tab]);
     },
     [navigate],
   );
 
   const openPlanTrip = useCallback(() => {
+    setSelectedTripId(null);
     navigate(PLAN_TRIP_PATH);
   }, [navigate]);
 
@@ -40,15 +59,35 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     navigate(TAB_PATHS.home);
   }, [navigate]);
 
+  const openTripDetail = useCallback(
+    (tripId: number) => {
+      setSelectedTripId(tripId);
+      navigate(TAB_PATHS.trips);
+    },
+    [navigate],
+  );
+
   const value = useMemo(
     () => ({
       activeTab,
       isPlanTripOpen,
+      selectedTripId,
       navigateToTab,
       openPlanTrip,
       closePlanTrip,
+      openTripDetail,
+      closeTripDetail,
     }),
-    [activeTab, isPlanTripOpen, navigateToTab, openPlanTrip, closePlanTrip],
+    [
+      activeTab,
+      isPlanTripOpen,
+      selectedTripId,
+      navigateToTab,
+      openPlanTrip,
+      closePlanTrip,
+      openTripDetail,
+      closeTripDetail,
+    ],
   );
 
   return (

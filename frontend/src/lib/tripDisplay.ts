@@ -16,45 +16,63 @@ export function formatRecentTripDateLabel(iso: string): string {
   });
 }
 
-export function formatActiveTripDateLabel(iso: string): string {
-  return new Date(iso)
-    .toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
-    .toUpperCase();
-}
-
-export function toTripListItem(
-  trip: TripResponseDto,
-  dateStyle: "short" | "long" = "short",
-): TripListItem {
+export function toTripListItem(trip: TripResponseDto): TripListItem {
   return {
     id: trip.id,
     origin: trip.pickup_location.address,
     destination: trip.delivery_location.address,
-    dateLabel:
-      dateStyle === "long"
-        ? formatActiveTripDateLabel(trip.created_at)
-        : formatRecentTripDateLabel(trip.created_at),
+    dateLabel: formatRecentTripDateLabel(trip.created_at),
     status: trip.status,
   };
 }
 
-export function getActiveTrip(trips: TripResponseDto[]): TripListItem | null {
-  const active = trips.find((trip) => trip.status === "in_progress");
-  return active ? toTripListItem(active, "long") : null;
-}
-
 export function getRecentTrips(
   trips: TripResponseDto[],
-  options: { limit?: number; excludeId?: number } = {},
+  limit = 3,
 ): TripListItem[] {
-  const { limit = 5, excludeId } = options;
+  return trips.slice(0, limit).map((trip) => toTripListItem(trip));
+}
 
-  return trips
-    .filter((trip) => trip.status !== "in_progress" && trip.id !== excludeId)
-    .slice(0, limit)
-    .map((trip) => toTripListItem(trip));
+export function formatDistanceMiles(value: string | null): string {
+  if (value == null || value === "") {
+    return "—";
+  }
+
+  const miles = Number(value);
+  if (Number.isNaN(miles)) {
+    return "—";
+  }
+
+  return `${miles.toLocaleString("en-US", { maximumFractionDigits: 1 })} mi`;
+}
+
+export function formatDurationHours(value: string | null): string {
+  if (value == null || value === "") {
+    return "—";
+  }
+
+  const hours = Number(value);
+  if (Number.isNaN(hours)) {
+    return "—";
+  }
+
+  const wholeHours = Math.floor(hours);
+  const minutes = Math.round((hours - wholeHours) * 60);
+
+  if (wholeHours === 0) {
+    return `${minutes} min`;
+  }
+  if (minutes === 0) {
+    return `${wholeHours} hr`;
+  }
+  return `${wholeHours}h ${minutes}m`;
+}
+
+export function formatCycleHours(value: string, maxHours = 70): string {
+  const hours = Number(value);
+  if (Number.isNaN(hours)) {
+    return "—";
+  }
+
+  return `${hours.toLocaleString("en-US", { maximumFractionDigits: 1 })} / ${maxHours} hr`;
 }

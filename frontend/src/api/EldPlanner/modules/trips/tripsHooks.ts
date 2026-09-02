@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { tripsApi } from "./trips";
-import type { CreateTripDto } from "./trips.types";
+import type { CreateTripDto, TripResponseDto } from "./trips.types";
 
 /**
  * React Query hooks for trip operations.
@@ -21,8 +21,14 @@ export function useCreateTrip() {
 
   return useMutation({
     mutationFn: (data: CreateTripDto) => tripsApi.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trips"] });
+    onSuccess: (created) => {
+      queryClient.setQueryData<TripResponseDto[]>(["trips"], (current) => {
+        if (!current) {
+          return [created];
+        }
+        return [created, ...current.filter((trip) => trip.id !== created.id)];
+      });
+      void queryClient.invalidateQueries({ queryKey: ["trips"] });
     },
   });
 }
