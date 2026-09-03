@@ -9,7 +9,7 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate          # macOS / Linux
 pip install -r requirements.txt
-cp .env.example .env               # set OPENROUTESERVICE_API_KEY
+cp .env.example .env               # DATABASE_URL + keys
 python manage.py migrate
 python manage.py runserver         # http://127.0.0.1:8000
 ```
@@ -20,6 +20,11 @@ Copy `.env.example` → `.env` (gitignored).
 
 | Variable | Required | Description |
 | -------- | -------- | ----------- |
+| `DATABASE_URL` | Yes | PostgreSQL URL (`postgresql://` or `postgresql+psycopg://`) |
+| `SECRET_KEY` | Yes (prod) | Django secret key |
+| `DEBUG` | No | Default `True` locally; set `False` in production |
+| `ALLOWED_HOSTS` | No | Comma-separated hosts, default `localhost,127.0.0.1` |
+| `CORS_ALLOWED_ORIGINS` | No | Comma-separated frontend origins |
 | `OPENROUTESERVICE_API_KEY` | Yes (create trip) | OpenRouteService API key — **backend only** |
 | `OPENROUTESERVICE_BASE_URL` | No | Default `https://api.openrouteservice.org` |
 
