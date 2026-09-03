@@ -164,8 +164,8 @@ function TripOption({
       className={cn(
         "flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left transition",
         selected
-          ? "border-blue-200 bg-blue-50/50"
-          : "border-slate-200 bg-white hover:border-slate-300",
+          ? "border-blue-200 bg-blue-50/50 hover:bg-blue-50"
+          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
       )}
     >
       <span className="min-w-0 flex-1">

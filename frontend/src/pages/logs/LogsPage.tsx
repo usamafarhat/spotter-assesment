@@ -108,19 +108,40 @@ export default function LogsPage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col pb-4">
-      <AppHeader />
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+      <header className="shrink-0 border-b border-slate-100">
+        <AppHeader />
+        <div className="space-y-3 px-4 pt-4 pb-3">
+          <section>
+            <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">
+              Logs
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Daily 24-hour duty logs for each trip
+            </p>
+          </section>
 
-      <div className="flex flex-1 flex-col gap-4 px-4 pt-4">
-        <section className="space-y-1">
-          <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">
-            Logs
-          </h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            FMCSA-style daily grids and 24h duty segments.
-          </p>
-        </section>
+          {isLoading ? (
+            <div className="grid grid-cols-12 gap-2">
+              <Skeleton className="col-span-7 h-14 rounded-xl" />
+              <Skeleton className="col-span-5 h-14 rounded-xl" />
+            </div>
+          ) : trips.length > 0 ? (
+            <div className="space-y-2">
+              <LogsFilterBar
+                tripLabel={tripLabel}
+                dateLabel={dateLabel}
+                dateSelected={selectedDateKey != null}
+                onOpenTripPicker={() => setTripSheetOpen(true)}
+                onOpenDatePicker={() => setDateSheetOpen(true)}
+              />
+              {selectedTrip ? <LogsTripMetrics trip={selectedTrip} /> : null}
+            </div>
+          ) : null}
+        </div>
+      </header>
 
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         {isError && (
           <Alert variant="error">
             <AlertTitle>Could not load trips</AlertTitle>
@@ -140,10 +161,6 @@ export default function LogsPage() {
 
         {isLoading ? (
           <div className="space-y-4" aria-busy="true" aria-label="Loading logs">
-            <div className="grid grid-cols-12 gap-2">
-              <Skeleton className="col-span-7 h-14 rounded-xl" />
-              <Skeleton className="col-span-5 h-14 rounded-xl" />
-            </div>
             <Skeleton className="h-36 w-full rounded-2xl" />
             <Skeleton className="h-36 w-full rounded-2xl" />
           </div>
@@ -157,65 +174,54 @@ export default function LogsPage() {
               Plan New Trip
             </Button>
           </div>
+        ) : groups.length > 0 ? (
+          <LogsResultList
+            groups={groups}
+            showTripTitles={selectedTripId == null}
+          />
         ) : (
-          <>
-            <div className="sticky top-0 z-20 -mx-4 space-y-2 bg-background/95 px-4 py-1 backdrop-blur-md">
-              <LogsFilterBar
-                tripLabel={tripLabel}
-                dateLabel={dateLabel}
-                dateSelected={selectedDateKey != null}
-                onOpenTripPicker={() => setTripSheetOpen(true)}
-                onOpenDatePicker={() => setDateSheetOpen(true)}
-              />
-              {selectedTrip ? <LogsTripMetrics trip={selectedTrip} /> : null}
-            </div>
-
-            {groups.length > 0 ? (
-              <LogsResultList
-                groups={groups}
-                showTripTitles={selectedTripId == null}
-              />
-            ) : (
-              <div className="rounded-2xl border border-dashed border-border bg-secondary/40 px-4 py-8 text-center">
-                <p className="text-sm font-medium text-foreground">
-                  No ELD logs for this filter
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {selectedDateKey && selectedTripId == null
-                    ? "No trips have a log on this date."
-                    : selectedDateKey
-                      ? "This trip has no log on that date. Clear the date or pick another day."
-                      : "This trip has no duty segments yet."}
-                </p>
-              </div>
-            )}
-
-            <TripPickerSheet
-              open={tripSheetOpen}
-              trips={trips}
-              selectedTripId={selectedTripId}
-              onClose={() => setTripSheetOpen(false)}
-              onSelectTrip={(tripId) => {
-                updateFilters({ tripId });
-                setTripSheetOpen(false);
-              }}
-            />
-
-            <DatePickerSheet
-              key={dateSheetOpen ? `open-${selectedDateKey ?? "all"}` : "closed"}
-              open={dateSheetOpen}
-              selectedDateKey={selectedDateKey}
-              availableDateKeys={availableDateKeys}
-              subtitle={dateSubtitle}
-              onClose={() => setDateSheetOpen(false)}
-              onSelectDate={(dateKey) => {
-                updateFilters({ day: dateKey });
-                setDateSheetOpen(false);
-              }}
-            />
-          </>
+          <div className="rounded-2xl border border-dashed border-border bg-secondary/40 px-4 py-8 text-center">
+            <p className="text-sm font-medium text-foreground">
+              No ELD logs for this filter
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {selectedDateKey && selectedTripId == null
+                ? "No trips have a log on this date."
+                : selectedDateKey
+                  ? "This trip has no log on that date. Clear the date or pick another day."
+                  : "This trip has no duty segments yet."}
+            </p>
+          </div>
         )}
       </div>
+
+      {trips.length > 0 ? (
+        <>
+          <TripPickerSheet
+            open={tripSheetOpen}
+            trips={trips}
+            selectedTripId={selectedTripId}
+            onClose={() => setTripSheetOpen(false)}
+            onSelectTrip={(tripId) => {
+              updateFilters({ tripId });
+              setTripSheetOpen(false);
+            }}
+          />
+
+          <DatePickerSheet
+            key={dateSheetOpen ? `open-${selectedDateKey ?? "all"}` : "closed"}
+            open={dateSheetOpen}
+            selectedDateKey={selectedDateKey}
+            availableDateKeys={availableDateKeys}
+            subtitle={dateSubtitle}
+            onClose={() => setDateSheetOpen(false)}
+            onSelectDate={(dateKey) => {
+              updateFilters({ day: dateKey });
+              setDateSheetOpen(false);
+            }}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

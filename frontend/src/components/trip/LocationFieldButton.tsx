@@ -42,7 +42,7 @@ export function LocationFieldButton({
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             disabled
               ? "cursor-not-allowed border-input opacity-60"
-              : "hover:border-muted-foreground/40 focus-visible:ring-ring",
+              : "hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-ring",
             hasError && !disabled
               ? "border-error focus-visible:ring-error/30"
               : !disabled && "border-input",

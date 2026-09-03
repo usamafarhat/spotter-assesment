@@ -75,7 +75,7 @@ function TripDetailErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div className="flex flex-1 flex-col bg-card">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-card">
       <div className="flex flex-1 flex-col gap-4 px-5 py-6">
         <Alert variant="error">
           <AlertTitle>{title}</AlertTitle>

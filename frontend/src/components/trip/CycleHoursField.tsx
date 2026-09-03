@@ -1,6 +1,5 @@
 import { Clock } from "lucide-react";
 import { Input } from "../ui/Input";
-import { Label } from "../ui/Label";
 import { cn } from "../../lib/cn";
 import { MAX_CYCLE_HRS } from "../../lib/tripFormValidation";
 
@@ -24,15 +23,7 @@ export function CycleHoursField({
 
   return (
     <div className="space-y-4">
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        How many hours you&apos;ve already worked in your current 70 hr / 8-day cycle
-        (driving + on-duty time combined).
-      </p>
-
-      <div className="space-y-2">
-        <Label className={cn(hasError && "text-error")}>
-          Hours already used (0–70)
-        </Label>
+      <div>
         <div className="relative">
           <Clock
             className={cn(
@@ -54,6 +45,7 @@ export function CycleHoursField({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="e.g. 12.5"
+            aria-label="Hours already used, 0 to 70"
             aria-invalid={hasError}
           />
         </div>

@@ -37,8 +37,95 @@
     @apply border-border;
   }
 
+  html,
+  body,
+  #root {
+    height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  #root {
+    display: flex;
+    flex-direction: column;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  select:not(:disabled),
+  summary,
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled) {
+    transition:
+      background-color 150ms ease,
+      background-image 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      color 150ms ease,
+      opacity 150ms ease,
+      filter 150ms ease;
+  }
+
+  @media (hover: hover) {
+    button:not(:disabled):not([data-nav-tab]):hover,
+    [role="button"]:not([aria-disabled="true"]):hover,
+    input[type="button"]:not(:disabled):hover,
+    input[type="submit"]:not(:disabled):hover,
+    input[type="reset"]:not(:disabled):hover {
+      background-image: linear-gradient(
+        color-mix(in srgb, currentColor 12%, transparent),
+        color-mix(in srgb, currentColor 12%, transparent)
+      );
+    }
+
+    button:not(:disabled):not([data-nav-tab]):active,
+    [role="button"]:not([aria-disabled="true"]):active,
+    input[type="button"]:not(:disabled):active,
+    input[type="submit"]:not(:disabled):active,
+    input[type="reset"]:not(:disabled):active {
+      background-image: linear-gradient(
+        color-mix(in srgb, currentColor 18%, transparent),
+        color-mix(in srgb, currentColor 18%, transparent)
+      );
+    }
+  }
+
+  :disabled,
+  [aria-disabled="true"],
+  [aria-disabled="true"] * {
+    cursor: not-allowed;
+  }
+
+  input:not(
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="checkbox"],
+      [type="radio"],
+      [type="file"],
+      [type="range"],
+      [type="color"]
+    ):not(:disabled),
+  textarea:not(:disabled) {
+    cursor: text;
   }
 
   .pb-safe {

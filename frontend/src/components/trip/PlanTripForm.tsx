@@ -14,6 +14,7 @@ import {
 } from "../../types/trip";
 import type { SelectedLocation } from "../../types/location";
 import { Button } from "../ui/Button";
+import { Tooltip } from "../ui/Tooltip";
 import { CycleHoursField } from "./CycleHoursField";
 import { FormGlobalError } from "./FormGlobalError";
 import { LocationFieldButton } from "./LocationFieldButton";
@@ -111,11 +112,19 @@ export function PlanTripForm() {
                 <FormGlobalError message={globalError} />
 
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b border-border pb-3">
-                    <Route className="size-5 text-foreground" aria-hidden />
-                    <h2 className="text-base font-bold text-foreground">
-                      Route Details
-                    </h2>
+                  <div className="space-y-1.5 border-b border-border pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <Route
+                        className="block size-6 shrink-0 text-foreground"
+                        aria-hidden
+                      />
+                      <h2 className="text-base leading-none font-bold text-foreground">
+                        Route Details
+                      </h2>
+                    </div>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      Where you are now, where you pick up, and where you deliver.
+                    </p>
                   </div>
 
                   <div className="space-y-4">
@@ -140,38 +149,43 @@ export function PlanTripForm() {
                         disabled={values.pickupSameAsCurrent}
                         onClick={() => setActiveLocationField("pickupLocation")}
                         trailing={
-                          <label
-                            className={cn(
-                              "flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm",
-                              !values.currentLocation && "cursor-not-allowed opacity-60",
-                            )}
+                          <Tooltip
+                            side="top"
+                            enabled={!values.currentLocation}
+                            content="Set current location first"
                           >
-                            <input
-                              type="checkbox"
-                              className="size-4 rounded border-input accent-info"
-                              checked={values.pickupSameAsCurrent}
-                              disabled={!values.currentLocation}
-                              onChange={(event) => {
-                                const checked = event.target.checked;
-                                void setFieldValue("pickupSameAsCurrent", checked);
-                                void setFieldError("pickupLocation", undefined);
-                                setGlobalError(undefined);
-
-                                if (checked && values.currentLocation) {
-                                  void setFieldValue(
-                                    "pickupLocation",
-                                    values.currentLocation,
-                                  );
-                                }
-                              }}
-                            />
-                            <span
-                              className="whitespace-nowrap text-foreground"
-                              title="Same as current location"
+                            <label
+                              className={cn(
+                                "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm",
+                                !values.currentLocation
+                                  ? "cursor-not-allowed opacity-60"
+                                  : "cursor-pointer",
+                              )}
                             >
-                              Same as current
-                            </span>
-                          </label>
+                              <input
+                                type="checkbox"
+                                className="size-4 rounded border-input accent-info"
+                                checked={values.pickupSameAsCurrent}
+                                disabled={!values.currentLocation}
+                                onChange={(event) => {
+                                  const checked = event.target.checked;
+                                  void setFieldValue("pickupSameAsCurrent", checked);
+                                  void setFieldError("pickupLocation", undefined);
+                                  setGlobalError(undefined);
+
+                                  if (checked && values.currentLocation) {
+                                    void setFieldValue(
+                                      "pickupLocation",
+                                      values.currentLocation,
+                                    );
+                                  }
+                                }}
+                              />
+                              <span className="whitespace-nowrap text-foreground">
+                                Same as current
+                              </span>
+                            </label>
+                          </Tooltip>
                         }
                       />
 
@@ -195,16 +209,23 @@ export function PlanTripForm() {
                 </section>
 
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b border-border pb-3">
-                    <Clock className="size-5 text-warning" aria-hidden />
-                    <div>
-                      <h2 className="text-base font-bold text-foreground">
+                  <div className="space-y-1.5 border-b border-border pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <Clock
+                        className="block size-6 shrink-0 text-warning"
+                        aria-hidden
+                      />
+                      <h2 className="text-base leading-none font-bold text-foreground">
                         Cycle Hours Used
                       </h2>
-                      <p className="text-xs text-muted-foreground">
-                        70 hr / 8-day window
-                      </p>
+                      <span className="rounded-full bg-warning-subtle px-2 py-0.5 text-[10px] leading-none font-semibold text-warning">
+                        70h / 8-day window
+                      </span>
                     </div>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      How many hours have you used in this cycle (driving + on-duty
+                      combined).
+                    </p>
                   </div>
 
                   <CycleHoursField

@@ -1,5 +1,6 @@
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "../ui/Button";
+import { DRIVER_NAME, ProfileAvatar } from "./ProfileAvatar";
 
 type PlanTripHeaderProps = {
   onBack: () => void;
@@ -11,9 +12,8 @@ export function PlanTripHeader({ onBack }: PlanTripHeaderProps) {
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={onBack}
-          className="size-9 p-0"
           aria-label="Go back"
         >
           <ArrowLeft className="size-5" aria-hidden />
@@ -21,12 +21,9 @@ export function PlanTripHeader({ onBack }: PlanTripHeaderProps) {
 
         <p className="text-center text-base font-bold text-foreground">Spotter</p>
 
-        <div
-          className="flex size-9 items-center justify-center rounded-full bg-secondary"
-          aria-label="User profile"
-        >
-          <User className="size-4 text-muted-foreground" aria-hidden />
-        </div>
+        <span className="justify-self-end" aria-label={`${DRIVER_NAME}'s profile`}>
+          <ProfileAvatar size="sm" />
+        </span>
       </div>
     </header>
   );

@@ -4,6 +4,7 @@ import { queryClient } from "@/api/EldPlanner/queryClient";
 import { AppLayout } from "./components/layout/AppLayout";
 import { GoogleMapsProvider } from "./context/GoogleMapsContext";
 import { NavigationProvider } from "./context/NavigationContext";
+import { TooltipProvider } from "./components/ui/Tooltip";
 import HomePage from "./pages/home/HomePage";
 import LogsPage from "./pages/logs/LogsPage";
 import PlanTripPage from "./pages/trips/PlanTripPage";
@@ -16,16 +17,18 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <GoogleMapsProvider>
         <NavigationProvider>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/trips/plan-trip" element={<PlanTripPage />} />
-              <Route path="/trips/:tripId" element={<TripDetailPage />} />
-              <Route path="/trips" element={<TripsPage />} />
-              <Route path="/logs" element={<LogsPage />} />
-            </Route>
-            <Route path="/view-all-components" element={<ViewAllComponents />} />
-          </Routes>
+          <TooltipProvider>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/trips/plan-trip" element={<PlanTripPage />} />
+                <Route path="/trips/:tripId" element={<TripDetailPage />} />
+                <Route path="/trips" element={<TripsPage />} />
+                <Route path="/logs" element={<LogsPage />} />
+              </Route>
+              <Route path="/view-all-components" element={<ViewAllComponents />} />
+            </Routes>
+          </TooltipProvider>
         </NavigationProvider>
       </GoogleMapsProvider>
     </QueryClientProvider>

@@ -1,8 +1,9 @@
-import { Truck, User } from "lucide-react";
+import { Truck } from "lucide-react";
+import { DRIVER_NAME, ProfileAvatar } from "./ProfileAvatar";
 
 export function AppHeader() {
   return (
-    <header className="w-full bg-background">
+    <header className="w-full bg-white">
       <div className="flex items-center justify-between px-5 pb-2 pt-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
@@ -20,10 +21,10 @@ export function AppHeader() {
 
         <button
           type="button"
-          aria-label="Profile"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors hover:bg-[#e2e8f0]"
+          aria-label={`${DRIVER_NAME}'s profile`}
+          className="rounded-full transition-opacity hover:opacity-80"
         >
-          <User className="size-[22px]" aria-hidden />
+          <ProfileAvatar />
         </button>
       </div>
     </header>

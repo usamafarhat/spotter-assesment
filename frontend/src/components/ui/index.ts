@@ -6,3 +6,4 @@ export { Input } from "./Input";
 export { Label } from "./Label";
 export { Separator } from "./Separator";
 export { Textarea } from "./Textarea";
+export { Tooltip, TooltipProvider } from "./Tooltip";

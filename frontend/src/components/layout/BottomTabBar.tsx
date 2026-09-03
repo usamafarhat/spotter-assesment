@@ -30,31 +30,33 @@ function TabButton({
   return (
     <button
       type="button"
+      data-nav-tab=""
       onClick={onSelect}
       aria-current={isActive ? "page" : undefined}
-      className="flex min-w-16 flex-col items-center justify-center gap-1 text-[11px] tracking-tight"
+      className="group flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-0.5"
     >
       <span
         className={cn(
-          "flex size-8 items-center justify-center transition-colors",
-          isActive && "rounded-lg bg-info-subtle",
+          "flex size-8 items-center justify-center rounded-lg transition-colors duration-150",
+          isActive ? "bg-info-subtle" : "group-hover:bg-slate-100",
         )}
       >
         <Icon
           className={cn(
-            "size-[22px]",
+            "size-[22px] transition-colors duration-150",
             isActive
               ? "stroke-[2.5] text-info"
-              : "stroke-2 text-muted-foreground",
+              : "stroke-2 text-muted-foreground group-hover:text-foreground",
           )}
           aria-hidden
         />
       </span>
       <span
         className={cn(
+          "text-[11px] tracking-tight transition-colors duration-150",
           isActive
             ? "font-bold text-info"
-            : "font-medium text-muted-foreground hover:text-foreground",
+            : "font-medium text-muted-foreground group-hover:text-foreground",
         )}
       >
         {tab.label}
@@ -71,7 +73,7 @@ export function BottomTabBar() {
       className="shrink-0 border-t border-[#f1f5f9] bg-card pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.02)]"
       aria-label="Main navigation"
     >
-      <div className="flex h-16 items-center justify-around px-4">
+      <div className="flex h-16 items-stretch">
         {tabs.map((tab) => (
           <TabButton
             key={tab.id}

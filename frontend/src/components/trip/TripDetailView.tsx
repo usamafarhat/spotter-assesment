@@ -69,14 +69,14 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
   ];
 
   return (
-    <div className="flex flex-1 flex-col bg-card">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
       <header className="sticky top-0 z-30 border-b border-slate-100 bg-card/95 px-4 py-3.5 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onBack}
-            className="-ml-1 size-9 shrink-0 p-1 active:scale-95"
+            className="-ml-1 shrink-0 active:scale-95"
             aria-label="Back to trips"
           >
             <ArrowLeft className="size-5" aria-hidden />
@@ -102,7 +102,7 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-hidden">
         {hasRoute ? (
           <TripRouteMap
             routeToPickupPolyline={trip.route_to_pickup_polyline}
@@ -111,10 +111,10 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
             pickupLocation={trip.pickup_location}
             deliveryLocation={trip.delivery_location}
             dutySegments={trip.duty_segments}
-            className="aspect-auto h-72 rounded-none border-0 border-b border-slate-200"
+            className="aspect-auto h-72 shrink-0 rounded-none border-0 border-b border-slate-200"
           />
         ) : (
-          <div className="flex h-72 w-full flex-col items-center justify-center gap-2 border-b border-slate-200 bg-secondary px-6 text-center">
+          <div className="flex h-72 w-full shrink-0 flex-col items-center justify-center gap-2 border-b border-slate-200 bg-secondary px-6 text-center">
             <Route className="size-6 text-muted-foreground" aria-hidden />
             <p className="text-sm font-medium text-foreground">No route to show</p>
             <p className="text-xs text-muted-foreground">
@@ -123,7 +123,7 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
           </div>
         )}
 
-        <div className="space-y-6 p-4">
+        <div className="space-y-6 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto">
           <section>
             <h2 className="text-base font-bold leading-snug text-foreground">
               {trip.pickup_location.address} → {trip.delivery_location.address}
@@ -147,7 +147,7 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
               value={formatDurationHours(trip.total_trip_hours)}
             />
             <StatCard
-              label="Cycle used"
+              label="Cycle used before trip"
               value={formatCycleHours(trip.current_cycle_used_hrs)}
             />
           </section>
@@ -241,14 +241,14 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 export function TripDetailSkeleton({ onBack }: { onBack: () => void }) {
   return (
-    <div className="flex flex-1 flex-col bg-card">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
       <header className="sticky top-0 z-30 border-b border-slate-100 bg-card/95 px-4 py-3.5 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onBack}
-            className="-ml-1 size-9 p-1"
+            className="-ml-1 shrink-0"
             aria-label="Back to trips"
           >
             <ArrowLeft className="size-5" aria-hidden />
@@ -263,9 +263,13 @@ export function TripDetailSkeleton({ onBack }: { onBack: () => void }) {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto" aria-busy="true" aria-label="Loading trip">
-        <Skeleton className="h-72 w-full rounded-none" />
-        <div className="space-y-6 p-4">
+      <div
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-hidden"
+        aria-busy="true"
+        aria-label="Loading trip"
+      >
+        <Skeleton className="h-72 w-full shrink-0 rounded-none" />
+        <div className="space-y-6 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto">
           <div className="space-y-2">
             <Skeleton className="h-5 w-full max-w-sm" />
             <Skeleton className="h-3 w-28" />

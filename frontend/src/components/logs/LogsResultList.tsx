@@ -8,8 +8,9 @@ type LogsResultListProps = {
 };
 
 export function LogsResultList({ groups, showTripTitles }: LogsResultListProps) {
-  const singleCard =
-    groups.length === 1 && groups[0]?.entries.length === 1;
+  const firstEntryKey = groups[0]?.entries[0]
+    ? `${groups[0].trip.id}-${groups[0].entries[0].day.dateKey}`
+    : null;
 
   return (
     <div className="space-y-5">
@@ -33,13 +34,17 @@ export function LogsResultList({ groups, showTripTitles }: LogsResultListProps) 
             </div>
           ) : null}
 
-          {group.entries.map((entry) => (
-            <EldLogDayCard
-              key={`${entry.trip.id}-${entry.day.dateKey}`}
-              entry={entry}
-              defaultExpanded={singleCard}
-            />
-          ))}
+          {group.entries.map((entry) => {
+            const entryKey = `${entry.trip.id}-${entry.day.dateKey}`;
+
+            return (
+              <EldLogDayCard
+                key={entryKey}
+                entry={entry}
+                defaultExpanded={entryKey === firstEntryKey}
+              />
+            );
+          })}
         </section>
       ))}
     </div>
