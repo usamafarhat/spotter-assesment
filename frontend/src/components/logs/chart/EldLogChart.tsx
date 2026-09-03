@@ -17,6 +17,25 @@ type EldLogChartProps = {
   day: EldLogDay;
 };
 
+function HourLabel({ hour, y }: { hour: number; y: number }) {
+  const label = ELD_HOUR_LABELS[hour];
+  const isNamed = hour === 0 || hour === 12;
+
+  return (
+    <text
+      x={minuteToX(hour * 60)}
+      y={y}
+      textAnchor={hour === 0 ? "start" : "middle"}
+      fill="#374151"
+      fontSize={isNamed ? 7 : 8}
+      fontWeight={isNamed ? 700 : 600}
+      fontFamily="Plus Jakarta Sans, system-ui, sans-serif"
+    >
+      {label}
+    </text>
+  );
+}
+
 export function EldLogChart({ day }: EldLogChartProps) {
   const linePath = buildLinePath(day.blocks);
   const vertices = buildVertexPoints(day.blocks);
@@ -133,32 +152,20 @@ export function EldLogChart({ day }: EldLogChartProps) {
         strokeWidth={1.2}
       />
 
-      {HOUR_TICKS.slice(0, 24).map((hour) => (
-        <text
+      {HOUR_TICKS.map((hour) => (
+        <HourLabel
           key={`top-${hour}`}
-          x={minuteToX(hour * 60)}
+          hour={hour}
           y={ELD_GRID_TOP - 6}
-          textAnchor="middle"
-          fill="#374151"
-          fontSize={9}
-          fontFamily="Inter, system-ui, sans-serif"
-        >
-          {ELD_HOUR_LABELS[hour]}
-        </text>
+        />
       ))}
 
-      {HOUR_TICKS.slice(0, 24).map((hour) => (
-        <text
+      {HOUR_TICKS.map((hour) => (
+        <HourLabel
           key={`bottom-${hour}`}
-          x={minuteToX(hour * 60)}
+          hour={hour}
           y={ELD_GRID_BOTTOM + 14}
-          textAnchor="middle"
-          fill="#374151"
-          fontSize={9}
-          fontFamily="Inter, system-ui, sans-serif"
-        >
-          {ELD_HOUR_LABELS[hour]}
-        </text>
+        />
       ))}
 
       {linePath ? (

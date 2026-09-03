@@ -9,12 +9,12 @@ import {
 
 export const ELD_CHART_LAYOUT = {
   labelWidth: 118,
-  hourWidth: 28,
+  hourWidth: 36,
   rowHeight: 34,
-  axisHeight: 18,
+  axisHeight: 22,
   remarksHeight: 64,
-  marginRight: 10,
-  marginTop: 8,
+  marginRight: 16,
+  marginTop: 10,
 } as const;
 
 const GRID_WIDTH = ELD_CHART_LAYOUT.hourWidth * 24;
@@ -67,5 +67,5 @@ export function buildVertexPoints(blocks: EldLogBlock[]): [number, number][] {
   );
 }
 
-export const HOUR_TICKS = Array.from({ length: 25 }, (_, quarter) => quarter * 4);
+export const HOUR_TICKS = Array.from({ length: 24 }, (_, hour) => hour);
 export const QUARTER_TICKS = Array.from({ length: 97 }, (_, quarter) => quarter);

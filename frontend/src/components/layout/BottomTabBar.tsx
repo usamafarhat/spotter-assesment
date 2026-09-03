@@ -71,7 +71,7 @@ export function BottomTabBar() {
       className="fixed inset-x-0 bottom-0 z-50 border-t border-[#f1f5f9] bg-card pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.02)]"
       aria-label="Main navigation"
     >
-      <div className="mx-auto flex h-16 max-w-md items-center justify-around px-4">
+      <div className="mx-auto flex h-16 max-w-md items-center justify-around px-4 lg:max-w-xl">
         {tabs.map((tab) => (
           <TabButton
             key={tab.id}

@@ -1,4 +1,5 @@
 export { EldLogChart } from "./EldLogChart";
+export { EldLogChartViewport } from "./EldLogChartViewport";
 export {
   buildLinePath,
   buildVertexPoints,

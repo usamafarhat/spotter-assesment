@@ -5,6 +5,7 @@ import { DatePickerSheet } from "@/components/logs/picker/DatePickerSheet";
 import { LogsFilterBar } from "@/components/logs/picker/LogsFilterBar";
 import { TripPickerSheet } from "@/components/logs/picker/TripPickerSheet";
 import { LogsResultList } from "@/components/logs/LogsResultList";
+import { LogsTripMetrics } from "@/components/logs/LogsTripMetrics";
 import {
   buildTripLogEntries,
   collectLogDateKeys,
@@ -112,11 +113,11 @@ export default function LogsPage() {
 
       <div className="flex flex-1 flex-col gap-4 px-4 pt-4">
         <section className="space-y-1">
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">
             Logs
           </h1>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            Daily ELD grids from trip duty segments.
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            FMCSA-style daily grids and 24h duty segments.
           </p>
         </section>
 
@@ -158,7 +159,7 @@ export default function LogsPage() {
           </div>
         ) : (
           <>
-            <div className="sticky top-0 z-20 -mx-4 bg-background/95 px-4 py-1 backdrop-blur-md">
+            <div className="sticky top-0 z-20 -mx-4 space-y-2 bg-background/95 px-4 py-1 backdrop-blur-md">
               <LogsFilterBar
                 tripLabel={tripLabel}
                 dateLabel={dateLabel}
@@ -166,6 +167,7 @@ export default function LogsPage() {
                 onOpenTripPicker={() => setTripSheetOpen(true)}
                 onOpenDatePicker={() => setDateSheetOpen(true)}
               />
+              {selectedTrip ? <LogsTripMetrics trip={selectedTrip} /> : null}
             </div>
 
             {groups.length > 0 ? (

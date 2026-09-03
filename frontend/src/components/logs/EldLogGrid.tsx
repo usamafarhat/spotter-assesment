@@ -1,5 +1,5 @@
 import type { EldLogDay } from "./lib/eldLogUtils";
-import { EldLogChart } from "./chart";
+import { EldLogChartViewport } from "./chart/EldLogChartViewport";
 import { EldLogTotalsPanel } from "./totals";
 
 type EldLogGridProps = {
@@ -9,9 +9,7 @@ type EldLogGridProps = {
 export function EldLogSheet({ day }: { day: EldLogDay }) {
   return (
     <div className="space-y-2">
-      <div className="overflow-hidden rounded-xl border border-slate-300 bg-white p-2">
-        <EldLogChart day={day} />
-      </div>
+      <EldLogChartViewport day={day} />
       <EldLogTotalsPanel blocks={day.blocks} />
     </div>
   );

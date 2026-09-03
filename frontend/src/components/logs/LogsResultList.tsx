@@ -24,6 +24,13 @@ export function LogsResultList({ groups, showTripTitles }: LogsResultListProps) 
                 {tripRouteLabel(group.trip)}
               </p>
             </div>
+          ) : group.entries.length > 1 ? (
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Daily logs</h3>
+              <p className="text-[11px] text-muted-foreground">
+                {group.entries.length} daily 24-hour records
+              </p>
+            </div>
           ) : null}
 
           {group.entries.map((entry) => (

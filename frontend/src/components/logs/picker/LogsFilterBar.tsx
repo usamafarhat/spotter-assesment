@@ -17,10 +17,13 @@ export function LogsFilterBar({
   onOpenDatePicker,
 }: LogsFilterBarProps) {
   return (
-    <section className="grid grid-cols-12 gap-2" aria-label="Log filters">
+    <section
+      className="grid grid-cols-12 gap-2 rounded-xl border border-slate-200/80 bg-white p-2 shadow-[0_1px_8px_rgba(0,0,0,0.03)]"
+      aria-label="Log filters"
+    >
       <FilterTrigger
         className="col-span-7"
-        label="Trip"
+        label="Active trip"
         value={tripLabel}
         icon={Map}
         onClick={onOpenTripPicker}
@@ -57,18 +60,18 @@ function FilterTrigger({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center justify-between gap-1 rounded-xl border px-3 py-2.5 text-left shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition",
+        "flex items-center justify-between gap-1 rounded-lg px-2.5 py-2 text-left transition",
         active
-          ? "border-blue-200 bg-blue-50/40 hover:border-blue-400"
-          : "border-slate-200 bg-white hover:border-slate-300",
+          ? "bg-blue-50 hover:bg-blue-100/70"
+          : "bg-slate-50 hover:bg-slate-100",
         className,
       )}
     >
       <div className="flex min-w-0 items-center gap-2">
         <span
           className={cn(
-            "shrink-0 rounded-lg p-1.5",
-            active ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-600",
+            "shrink-0 rounded-md p-1.5",
+            active ? "bg-blue-600 text-white" : "bg-white text-blue-600",
           )}
         >
           <Icon className="size-4" aria-hidden />
