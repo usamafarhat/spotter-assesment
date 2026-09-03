@@ -53,7 +53,10 @@ export default function TripDetailPage() {
     return (
       <TripDetailErrorState
         title={isNotFound ? "Trip not found" : "Could not load trip"}
-        message={getErrorMessage(error, isNotFound ? NOT_FOUND_MESSAGE : LOAD_ERROR_MESSAGE)}
+        message={getErrorMessage(
+          error,
+          isNotFound ? NOT_FOUND_MESSAGE : LOAD_ERROR_MESSAGE,
+        )}
         onBack={goBack}
         onRetry={isNotFound ? undefined : () => refetch()}
       />

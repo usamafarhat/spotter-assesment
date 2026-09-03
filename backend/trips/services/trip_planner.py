@@ -38,9 +38,7 @@ def _coords_match(
     lat_b: float,
     lng_b: float,
 ) -> bool:
-    return (
-        abs(lat_a - lat_b) < COORD_EPSILON and abs(lng_a - lng_b) < COORD_EPSILON
-    )
+    return abs(lat_a - lat_b) < COORD_EPSILON and abs(lng_a - lng_b) < COORD_EPSILON
 
 
 def _empty_route() -> RouteResult:

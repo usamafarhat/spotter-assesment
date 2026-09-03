@@ -21,7 +21,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useNavigation } from "@/context/NavigationContext";
+import { useNavigation } from "@/context/useNavigation";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { tripFilterLabel } from "@/lib/tripDisplay";
 
@@ -175,10 +175,7 @@ export default function LogsPage() {
             </Button>
           </div>
         ) : groups.length > 0 ? (
-          <LogsResultList
-            groups={groups}
-            showTripTitles={selectedTripId == null}
-          />
+          <LogsResultList groups={groups} showTripTitles={selectedTripId == null} />
         ) : (
           <div className="rounded-2xl border border-dashed border-border bg-secondary/40 px-4 py-8 text-center">
             <p className="text-sm font-medium text-foreground">

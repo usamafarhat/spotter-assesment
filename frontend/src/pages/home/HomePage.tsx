@@ -6,7 +6,7 @@ import { RecentTripCardSkeleton } from "@/components/home/RecentTripCardSkeleton
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
-import { useNavigation } from "@/context/NavigationContext";
+import { useNavigation } from "@/context/useNavigation";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { getRecentTrips } from "@/lib/tripDisplay";
 

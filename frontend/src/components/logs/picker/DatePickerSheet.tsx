@@ -110,7 +110,10 @@ export function DatePickerSheet({
                     "relative rounded-xl p-2 transition",
                     !cell.inCurrentMonth && "text-slate-300",
                     cell.inCurrentMonth && !hasLog && "text-slate-400",
-                    cell.inCurrentMonth && hasLog && !isSelected && "text-slate-800 hover:bg-blue-50 hover:text-blue-600",
+                    cell.inCurrentMonth &&
+                      hasLog &&
+                      !isSelected &&
+                      "text-slate-800 hover:bg-blue-50 hover:text-blue-600",
                     isSelected && "bg-blue-600 font-bold text-white shadow-sm",
                   )}
                 >

@@ -2,7 +2,7 @@ import { Form, Formik, type FormikHelpers } from "formik";
 import { Clock, LocateFixed, MapPin, Package, Route } from "lucide-react";
 import { useState } from "react";
 import { useCreateTrip } from "@/api/EldPlanner/modules/trips";
-import { useNavigation } from "@/context/NavigationContext";
+import { useNavigation } from "@/context/useNavigation";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { applyTripApiFieldErrors } from "@/lib/tripApiErrors";
 import { toCreateTripDto } from "@/lib/tripFormMapper";
@@ -197,7 +197,7 @@ export function PlanTripForm() {
                     </div>
 
                     <LocationFieldButton
-                      title="Dropoff location"
+                      title="Delivery location"
                       hint="Where do you deliver?"
                       value={values.dropoffLocation?.address ?? ""}
                       icon={MapPin}
@@ -224,7 +224,7 @@ export function PlanTripForm() {
                     </div>
                     <p className="text-xs leading-relaxed text-muted-foreground">
                       How many hours have you used in this cycle (driving + on-duty
-                      combined).
+                      combined)?
                     </p>
                   </div>
 

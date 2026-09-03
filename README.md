@@ -4,7 +4,7 @@ Full-stack assessment application for planning truck routes, generating Hours-of
 
 **Stack:** Django REST API (`backend/`) + React / TypeScript (`frontend/`)
 
-> **Context for AI agents & reviewers:** This repository is a **take-home technical assessment**. The sections below define the product requirements, domain rules, architecture boundaries, and current implementation status. Use the [Implementation Status](#implementation-status) table before making changes — it marks what is done vs. planned.
+> **Context for AI agents & reviewers:** This repository is a **take-home technical assessment**. The sections below define the product requirements, domain rules, and architecture boundaries.
 
 ---
 
@@ -16,10 +16,8 @@ Full-stack assessment application for planning truck routes, generating Hours-of
 - [Inputs & Outputs](#inputs--outputs)
 - [Architecture](#architecture)
 - [Repository Structure](#repository-structure)
-- [Implementation Status](#implementation-status)
 - [Getting Started](#getting-started)
 - [Domain Glossary](#domain-glossary)
-- [Submission Deliverables](#submission-deliverables)
 - [License & Notes](#license--notes)
 
 ---
@@ -104,20 +102,21 @@ The backend HOS engine must enforce FMCSA-style limits (driving windows, require
 | Dropoff location | `dropoffLocation` | Final delivery destination |
 | Current cycle used (hrs) | `currentCycleUsedHrs` | Hours already used in the current 70 hr / 8-day cycle (0–70) |
 
-TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
+TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripFormValues`
 
 ### Outputs
 
 | Output | API field / location | Status |
 | ------ | -------------------- | ------ |
-| **Driving route polyline** | `route_polyline` — `[[lat, lng], ...]` on `Trip` | ✅ On create (OpenRouteService) |
+| **Driving route polylines** | `route_to_pickup_polyline`, `route_to_delivery_polyline` — `[[lat, lng], ...]` | ✅ On create (OpenRouteService) |
 | **Total distance** | `total_distance_miles` | ✅ On create |
-| **Total drive duration** | `total_duration_hours` (driving time only; HOS rests not yet applied) | ✅ On create |
-| **Map** | Frontend renders polyline + markers | 🔲 Planned |
-| **Daily log sheets** | FMCSA 24h grids with duty segments | 🔲 Planned |
-| **Route plan (HOS)** | Driving legs, rests, fuel stops with timestamps | 🔲 Planned |
+| **Total drive duration** | `total_duration_hours` (driving time only) | ✅ On create |
+| **Total trip duration** | `total_trip_hours` (includes rests, pickup, dropoff, and fuel) | ✅ On create |
+| **Route plan (HOS)** | `duty_segments` — driving legs, rests, fuel stops with timestamps | ✅ On create |
+| **Map** | Frontend renders polylines + markers | ✅ Done |
+| **Daily log sheets** | FMCSA 24h grids from `duty_segments` | ✅ Done |
 
-**Current create-trip behavior:** `POST /api/trips/` validates input, calls **OpenRouteService** (backend-only) for a truck route along **current → pickup → delivery**, then saves the trip with polyline, miles, and hours. HOS rests and fuel stops are **not** applied yet — that will extend `trips/services/trip_planner.py`.
+**Current create-trip behavior:** `POST /api/trips/` validates input, calls **OpenRouteService** (backend-only) for truck routes on **current → pickup** and **pickup → delivery**, then runs the HOS engine (`trips/services/hos/`) and saves the trip with polylines, miles, hours, and duty segments.
 
 ---
 
@@ -127,7 +126,7 @@ TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
 ┌─────────────────────────────────────────────────────────────┐
 │  frontend/  (React + TypeScript + Vite + Tailwind)          │
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐ │
-│  │  TripForm   │  │   MapView    │  │   LogSheetView      │ │
+│  │ PlanTripForm│  │ TripRouteMap │  │   LogsPage          │ │
 │  │  (inputs)   │  │ (Google Maps │  │ (24h ELD grids)     │ │
 │  │             │  │  display)    │  │                     │ │
 │  └──────┬──────┘  └──────▲───────┘  └──────────▲──────────┘ │
@@ -143,7 +142,7 @@ TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
 │  services/       → business logic                           │
 │    openrouteservice.py  → ORS directions (API key here)     │
 │    trip_planner.py      → plan trip + save Trip             │
-│    (future) hos_engine  → rests, fuel, duty segments        │
+│    hos/                 → rests, fuel, duty segments        │
 └──────────────────────────┬──────────────────────────────────┘
                            │ HTTPS (server-side only)
 ┌──────────────────────────▼──────────────────────────────────┐
@@ -154,7 +153,7 @@ TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
 | Layer | Responsibility |
 | ----- | -------------- |
 | **Backend views** | HTTP only: validate → call service → return JSON + status |
-| **Backend services** | Routing (ORS), trip planning, future HOS engine |
+| **Backend services** | Routing (ORS), trip planning, HOS engine |
 | **Backend serializers** | Input validation; read/write JSON shape |
 | **Frontend** | User input, location picker, API calls, map/log UI |
 | **Google Maps (frontend)** | Search, geocode, map display — **not** used for route distance |
@@ -167,7 +166,7 @@ TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
 | Topic | Where | Behavior |
 | ----- | ----- | -------- |
 | **ORS profile** | `trips/services/openrouteservice.py` | `driving-hgv` (truck) |
-| **Waypoints on create** | `trips/services/trip_planner.py` | current → pickup → delivery |
+| **Waypoints on create** | `trips/services/trip_planner.py` | Two ORS legs: current → pickup, then pickup → delivery |
 | **Snap retry** | `openrouteservice.py` | Attempt 1: 350 m snap; attempt 2: 2 km snap if pins are off-road |
 | **Routing errors** | View catches `OpenRouteServiceError` | Returns `{ "detail": "..." }` with user-facing message (rate limit, snap failure, no route, etc.) |
 | **Frontend location rule** | `frontend/src/lib/googleMaps.ts` | Search rejects city/state-only picks; map tap allows pin on road |
@@ -180,54 +179,28 @@ TypeScript interface (frontend): `frontend/src/types/trip.ts` → `TripInput`
 ## Repository Structure
 
 ```
-spotter-assesment/
 ├── README.md                 ← project overview + requirements (this file)
 ├── backend/                  ← Django REST API
 │   ├── eld_planner/          ← Django project settings
 │   ├── trips/
-│   │   ├── models.py         ← Trip (locations, polyline, HOS fields TBD)
+│   │   ├── models.py         ← Trip + DutySegment
 │   │   ├── views/            ← one URL route → one file (e.g. trips_collection.py)
 │   │   ├── serializers/      ← validate I/O; create serializer has no business logic
-│   │   └── services/         ← ORS client + trip_planner (+ future HOS)
+│   │   └── services/         ← ORS client, trip_planner, HOS engine
 │   └── README.md             ← API setup, endpoints, routing notes
 └── frontend/                 ← React SPA
     ├── src/
     │   ├── api/EldPlanner/   ← HTTP client, React Query hooks
     │   ├── components/
     │   │   ├── layout/       ← App shell, navigation
-    │   │   ├── trip/         ← Plan trip form + location picker
-    │   │   ├── map/          ← Google Maps picker (display/search)
+    │   │   ├── trip/         ← Plan trip form + location picker + detail
+    │   │   ├── map/          ← Google Maps picker and route display
+    │   │   ├── logs/         ← ELD daily log grids
     │   │   └── home/         ← Dashboard trip cards
     │   ├── lib/              ← getErrorMessage, coordinates, tripDisplay
     │   ├── pages/            ← Dashboard, Trip, Logs tabs
     │   └── types/            ← Shared TypeScript types
 ```
-
----
-
-## Implementation Status
-
-> **For AI agents:** Check this table before implementing. Prefer extending existing files over creating duplicates.
-
-| Area | Status | Notes |
-| ---- | ------ | ----- |
-| Health check API | ✅ Done | `GET /api/health/` |
-| Trip list + create API | ✅ Done | `GET/POST /api/trips/` |
-| OpenRouteService routing | ✅ Done | On create: polyline, miles, hours via `trips/services/` |
-| ORS snap retry | ✅ Done | 350 m → 2 km; user-facing errors name failing stop |
-| Trip model | ✅ Done | Locations, `route_polyline`, distance/duration, status |
-| Frontend plan trip form | ✅ Done | Wired to `POST /api/trips/` + error handling |
-| Frontend trip list (home/trips) | ✅ Done | `useTrips()` + skeleton loaders |
-| Frontend API module | ✅ Done | `src/api/EldPlanner/` |
-| Trip detail API | 🔲 Planned | `GET /api/trips/<id>/` |
-| Duty status log model | 🔲 Planned | `off_duty`, `sleeper`, `driving`, `on_duty` |
-| HOS route engine | 🔲 Planned | Rests, fuel stops, cycle tracking in `trip_planner.py` |
-| Map polyline display | 🔲 Planned | Render saved `route_polyline` on Google Map |
-| ELD log sheet rendering | 🔲 Planned | FMCSA 24h grids in Logs tab |
-| Seed demo data | 🔲 Planned | `python manage.py seed_data` |
-| Frontend design system | ✅ Done | UI components, Tailwind theme, tab navigation |
-
-**Legend:** ✅ Done · 🟡 In progress · 🔲 Planned
 
 ---
 
@@ -257,12 +230,6 @@ Frontend env (see `frontend/.env.example`):
 | `VITE_GOOGLE_MAPS_API_KEY` | Google Maps (picker/display only) |
 | `VITE_API_BASE_URL` | Defaults to `/api` (Vite proxy to Django) |
 
-Optional (once implemented):
-
-```bash
-python manage.py seed_data         # load sample completed trips
-```
-
 See [backend/README.md](backend/README.md) for API docs and development commands.
 
 ### Frontend
@@ -273,7 +240,7 @@ npm install
 npm run dev                        # http://localhost:5173
 ```
 
-See [frontend/README.md](frontend/README.md) for scripts, component layout, and API layer details.
+Useful scripts: `npm run lint`, `npm run format`, `npm run build`.
 
 ### Run Both (typical local workflow)
 
@@ -294,22 +261,6 @@ See [frontend/README.md](frontend/README.md) for scripts, component layout, and 
 | **Cycle** | Rolling window (here: 70 hours in 8 days) tracking total on-duty + driving time |
 | **Polyline** | Ordered list of `[lat, lng]` points describing the driven path (from ORS) |
 | **OpenRouteService (ORS)** | Backend routing API; computes truck route — not called from frontend |
-
----
-
-## Submission Deliverables
-
-| Deliverable | Description |
-| ----------- | ----------- |
-| **Live hosted app** | Deploy working version (e.g. Vercel for frontend; backend hosted separately) |
-| **Loom walkthrough** | 3–5 minute video covering the app and key codebase areas |
-| **GitHub repository** | Complete source code shared with reviewers |
-| **$100 reward** | Awarded when hosted version meets accuracy standards |
-
-### Evaluation Criteria
-
-- **Accuracy** — Hosted app tested against expected route planning and ELD log output.
-- **UI / UX** — Polished interface can compensate for minor output inaccuracies.
 
 ---
 

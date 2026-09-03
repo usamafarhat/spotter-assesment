@@ -1,4 +1,4 @@
-import { GoogleMap, InfoWindow, Marker, Polyline } from "@react-google-maps/api";
+import { GoogleMap, Marker, OverlayView, Polyline } from "@react-google-maps/api";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DutySegmentDto } from "@/api/EldPlanner/modules/trips/dutySegment.types";
@@ -6,18 +6,19 @@ import type {
   LocationDto,
   RoutePolyline,
 } from "@/api/EldPlanner/modules/trips/trips.types";
-import { useGoogleMaps } from "@/context/GoogleMapsContext";
+import { useGoogleMaps } from "@/context/useGoogleMaps";
 import { cn } from "@/lib/cn";
 import {
   buildHosStopMarkers,
   buildTripRouteMarkers,
   createRouteMarkerIcon,
   hasRoutePolylines,
-  markerInfoWindowOffset,
+  markerPixelHeight,
   markerZIndex,
   mergeRoutePolylines,
   polylineToPath,
   type RouteMapMarker,
+  type RouteMarkerKind,
 } from "@/lib/routePolyline";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "@/types/location";
 
@@ -87,6 +88,38 @@ function markerKey(marker: RouteMapMarker): string {
   return marker.id ?? `${marker.kind}-${marker.lat}-${marker.lng}`;
 }
 
+const MARKER_KINDS: RouteMarkerKind[] = [
+  "current",
+  "pickup",
+  "destination",
+  "fuel",
+  "break",
+  "sleeper",
+];
+
+function MapPinTooltip({ marker }: { marker: RouteMapMarker }) {
+  const pinHeight = markerPixelHeight(marker.kind, true);
+
+  return (
+    <div
+      className="pointer-events-none z-[120] w-max max-w-96"
+      style={{
+        transform: `translate(-50%, calc(-100% - ${pinHeight + 8}px))`,
+      }}
+    >
+      <div className="w-max max-w-96 rounded-lg bg-slate-900 px-3 py-1.5 text-white shadow-lg">
+        <p className="text-[10px] leading-snug font-semibold">{marker.label}</p>
+        {marker.detail ? (
+          <p className="mt-0.5 w-max max-w-96 text-[9px] leading-snug font-medium text-slate-300">
+            {marker.detail}
+          </p>
+        ) : null}
+      </div>
+      <span className="mx-auto -mt-px block h-2 w-2 rotate-45 bg-slate-900" aria-hidden />
+    </div>
+  );
+}
+
 export function TripRouteMap({
   routeToPickupPolyline,
   routeToDeliveryPolyline,
@@ -100,6 +133,7 @@ export function TripRouteMap({
   const { isLoaded, loadError } = useGoogleMaps();
   const mapRef = useRef<google.maps.Map | null>(null);
   const [selectedMarkerKey, setSelectedMarkerKey] = useState<string | null>(null);
+  const [hoveredMarkerKey, setHoveredMarkerKey] = useState<string | null>(null);
 
   const pickupPath = useMemo(
     () => (routeToPickupPolyline?.length ? polylineToPath(routeToPickupPolyline) : []),
@@ -137,35 +171,34 @@ export function TripRouteMap({
     combinedPolyline,
   ]);
 
-  const selectedMarker = useMemo(
+  const activeMarkerKey = hoveredMarkerKey ?? selectedMarkerKey;
+  const activeMarker = useMemo(
     () =>
-      selectedMarkerKey
-        ? routeMarkers.find((marker) => markerKey(marker) === selectedMarkerKey)
+      activeMarkerKey
+        ? routeMarkers.find((marker) => markerKey(marker) === activeMarkerKey)
         : undefined,
-    [routeMarkers, selectedMarkerKey],
+    [activeMarkerKey, routeMarkers],
   );
 
   const markerIcons = useMemo(() => {
     if (!isLoaded) {
-      return new Map<RouteMapMarker["kind"], google.maps.Icon>();
+      return {
+        rest: new Map<RouteMarkerKind, google.maps.Icon>(),
+        emphasized: new Map<RouteMarkerKind, google.maps.Icon>(),
+      };
     }
 
-    return new Map<RouteMapMarker["kind"], google.maps.Icon>([
-      ["current", createRouteMarkerIcon("current")],
-      ["pickup", createRouteMarkerIcon("pickup")],
-      ["destination", createRouteMarkerIcon("destination")],
-      ["fuel", createRouteMarkerIcon("fuel")],
-      ["break", createRouteMarkerIcon("break")],
-      ["sleeper", createRouteMarkerIcon("sleeper")],
-    ]);
+    return {
+      rest: new Map(
+        MARKER_KINDS.map((kind) => [kind, createRouteMarkerIcon(kind)] as const),
+      ),
+      emphasized: new Map(
+        MARKER_KINDS.map(
+          (kind) => [kind, createRouteMarkerIcon(kind, { emphasized: true })] as const,
+        ),
+      ),
+    };
   }, [isLoaded]);
-
-  const infoWindowOffset = useMemo(() => {
-    if (!isLoaded || !selectedMarker) {
-      return undefined;
-    }
-    return new google.maps.Size(0, markerInfoWindowOffset(selectedMarker.kind));
-  }, [isLoaded, selectedMarker]);
 
   const initialCenter = combinedPath[0] ?? DEFAULT_MAP_CENTER;
   const showPickupLeg = pickupPath.length > 0;
@@ -203,7 +236,7 @@ export function TripRouteMap({
   return (
     <div
       className={cn(
-        "relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border bg-secondary",
+        "trip-route-map relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border bg-secondary",
         className,
       )}
     >
@@ -239,35 +272,35 @@ export function TripRouteMap({
 
             {routeMarkers.map((marker) => {
               const key = markerKey(marker);
+              const emphasized = key === activeMarkerKey;
               return (
                 <Marker
                   key={key}
                   position={marker}
-                  title={marker.label}
-                  icon={markerIcons.get(marker.kind)}
-                  zIndex={markerZIndex(marker.kind)}
+                  icon={
+                    emphasized
+                      ? markerIcons.emphasized.get(marker.kind)
+                      : markerIcons.rest.get(marker.kind)
+                  }
+                  zIndex={markerZIndex(marker.kind) + (emphasized ? 12 : 0)}
+                  options={{ optimized: false }}
+                  onMouseOver={() => setHoveredMarkerKey(key)}
+                  onMouseOut={() =>
+                    setHoveredMarkerKey((current) => (current === key ? null : current))
+                  }
                   onClick={() => setSelectedMarkerKey(key)}
                 />
               );
             })}
 
-            {selectedMarker ? (
-              <InfoWindow
-                position={selectedMarker}
-                options={{ pixelOffset: infoWindowOffset }}
-                onCloseClick={() => setSelectedMarkerKey(null)}
+            {activeMarker ? (
+              <OverlayView
+                key={markerKey(activeMarker)}
+                position={activeMarker}
+                mapPaneName={OverlayView.FLOAT_PANE}
               >
-                <div className="max-w-48 px-0.5 py-0.5">
-                  <p className="text-xs font-semibold leading-snug text-foreground">
-                    {selectedMarker.label}
-                  </p>
-                  {selectedMarker.detail ? (
-                    <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">
-                      {selectedMarker.detail}
-                    </p>
-                  ) : null}
-                </div>
-              </InfoWindow>
+                <MapPinTooltip marker={activeMarker} />
+              </OverlayView>
             ) : null}
           </GoogleMap>
 

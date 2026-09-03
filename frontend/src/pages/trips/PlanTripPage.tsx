@@ -1,6 +1,6 @@
 import { PlanTripForm } from "../../components/trip/PlanTripForm";
 import { PlanTripHeader } from "../../components/layout/PlanTripHeader";
-import { useNavigation } from "../../context/NavigationContext";
+import { useNavigation } from "../../context/useNavigation";
 
 export default function PlanTripPage() {
   const { closePlanTrip } = useNavigation();

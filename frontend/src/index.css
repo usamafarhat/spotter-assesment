@@ -85,8 +85,8 @@
   }
 
   @media (hover: hover) {
-    button:not(:disabled):not([data-nav-tab]):hover,
-    [role="button"]:not([aria-disabled="true"]):hover,
+    button:not(:disabled):not([data-nav-tab]):hover:not(:where(.gm-style, .gm-style *)),
+    [role="button"]:not([aria-disabled="true"]):hover:not(:where(.gm-style, .gm-style *)),
     input[type="button"]:not(:disabled):hover,
     input[type="submit"]:not(:disabled):hover,
     input[type="reset"]:not(:disabled):hover {
@@ -96,8 +96,8 @@
       );
     }
 
-    button:not(:disabled):not([data-nav-tab]):active,
-    [role="button"]:not([aria-disabled="true"]):active,
+    button:not(:disabled):not([data-nav-tab]):active:not(:where(.gm-style, .gm-style *)),
+    [role="button"]:not([aria-disabled="true"]):active:not(:where(.gm-style, .gm-style *)),
     input[type="button"]:not(:disabled):active,
     input[type="submit"]:not(:disabled):active,
     input[type="reset"]:not(:disabled):active {
@@ -130,5 +130,18 @@
 
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+}
+
+@layer components {
+  .trip-route-map .gm-style img[src^="data:image/svg"],
+  .trip-route-map .gm-style img[src^="data:image/svg"]:hover,
+  .trip-route-map .gm-style :is(div, button, [role="button"]):has(> img[src^="data:image/svg"]),
+  .trip-route-map .gm-style :is(div, button, [role="button"]):has(> img[src^="data:image/svg"]):hover {
+    background: transparent !important;
+    background-image: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    outline: none !important;
   }
 }

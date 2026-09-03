@@ -153,19 +153,11 @@ export function EldLogChart({ day }: EldLogChartProps) {
       />
 
       {HOUR_TICKS.map((hour) => (
-        <HourLabel
-          key={`top-${hour}`}
-          hour={hour}
-          y={ELD_GRID_TOP - 6}
-        />
+        <HourLabel key={`top-${hour}`} hour={hour} y={ELD_GRID_TOP - 6} />
       ))}
 
       {HOUR_TICKS.map((hour) => (
-        <HourLabel
-          key={`bottom-${hour}`}
-          hour={hour}
-          y={ELD_GRID_BOTTOM + 14}
-        />
+        <HourLabel key={`bottom-${hour}`} hour={hour} y={ELD_GRID_BOTTOM + 14} />
       ))}
 
       {linePath ? (

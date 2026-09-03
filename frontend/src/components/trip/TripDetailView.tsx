@@ -14,7 +14,7 @@ import type {
 import { TripRouteMap } from "@/components/map/TripRouteMap";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useNavigation } from "@/context/NavigationContext";
+import { useNavigation } from "@/context/useNavigation";
 import {
   formatCycleHours,
   formatDistanceMiles,
@@ -49,8 +49,7 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
       label: "Current",
       location: trip.current_location,
       icon: LocateFixed,
-      accentClassName:
-        "border border-success/20 bg-success-subtle text-success",
+      accentClassName: "border border-success/20 bg-success-subtle text-success",
     },
     {
       key: "pickup",

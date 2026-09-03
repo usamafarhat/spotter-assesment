@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("trips", "0002_trip_total_trip_hours_dutysegment"),
     ]

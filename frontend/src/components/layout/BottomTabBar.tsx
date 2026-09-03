@@ -1,7 +1,7 @@
 import { History, LayoutGrid, Route } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../../lib/cn";
-import { useNavigation } from "../../context/NavigationContext";
+import { useNavigation } from "../../context/useNavigation";
 import type { AppTab } from "../../types/navigation";
 
 type TabConfig = {

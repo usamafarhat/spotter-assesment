@@ -54,7 +54,7 @@ export function getMapZoom(location: SelectedLocation | null) {
 }
 
 /**
- * Blacklist-only — reject only when every type is city/state/country.
+ * Reject only when every type is city/state/country.
  * Addresses, warehouses, airports, and unknown Google types all pass.
  */
 export function isAcceptableLocation(types: string[] | undefined): boolean {

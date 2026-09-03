@@ -56,8 +56,7 @@ def _require_api_key() -> str:
             "OPENROUTESERVICE_API_KEY is not configured.",
             http_status=503,
             user_message=(
-                "Trip planning is temporarily unavailable. "
-                "Please try again later."
+                "Trip planning is temporarily unavailable. Please try again later."
             ),
         )
     return api_key
@@ -279,8 +278,7 @@ def _error_for_status(status_code: int, detail: str) -> OpenRouteServiceError:
             f"OpenRouteService auth failed ({status_code}): {detail}",
             http_status=503,
             user_message=(
-                "Trip planning is temporarily unavailable. "
-                "Please try again later."
+                "Trip planning is temporarily unavailable. Please try again later."
             ),
             ors_detail=detail,
         )
@@ -299,7 +297,7 @@ def _error_for_status(status_code: int, detail: str) -> OpenRouteServiceError:
             user_message=(
                 "No continuous truck route connects these stops. They may be too "
                 "far apart, separated by water, or missing from the route map. "
-                "Try different pickup or dropoff points closer to major roads."
+                "Try different pickup or delivery points closer to major roads."
             ),
             ors_detail=detail,
         )
@@ -351,7 +349,7 @@ def _parse_geojson_route(payload: dict) -> RouteResult:
             http_status=422,
             user_message=(
                 "No continuous truck route connects these stops. "
-                "Try different pickup or dropoff points closer to major roads."
+                "Try different pickup or delivery points closer to major roads."
             ),
         )
 

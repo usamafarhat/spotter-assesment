@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   PLAN_TRIP_PATH,
@@ -14,20 +7,7 @@ import {
   tripDetailPath,
   type AppTab,
 } from "../types/navigation";
-
-type NavigationContextValue = {
-  activeTab: AppTab;
-  isPlanTripOpen: boolean;
-  selectedLogsTripId: number | null;
-  navigateToTab: (tab: AppTab) => void;
-  openPlanTrip: () => void;
-  closePlanTrip: () => void;
-  openTripDetail: (tripId: number) => void;
-  openLogsForTrip: (tripId: number) => void;
-  setSelectedLogsTripId: (tripId: number | null) => void;
-};
-
-const NavigationContext = createContext<NavigationContextValue | null>(null);
+import { NavigationContext } from "./useNavigation";
 
 function getActiveTab(pathname: string): AppTab {
   if (pathname.startsWith("/trips")) return "trips";
@@ -100,12 +80,4 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   return (
     <NavigationContext.Provider value={value}>{children}</NavigationContext.Provider>
   );
-}
-
-export function useNavigation() {
-  const context = useContext(NavigationContext);
-  if (!context) {
-    throw new Error("useNavigation must be used within NavigationProvider");
-  }
-  return context;
 }

@@ -74,8 +74,8 @@ export function CycleHoursField({
             {hoursRemaining <= 0 ? (
               <>
                 Cycle is full. The plan starts with a{" "}
-                <span className="font-medium text-foreground">10 hr rest</span> to
-                reset hours, then continues.
+                <span className="font-medium text-foreground">10 hr rest</span> to reset
+                hours, then continues.
               </>
             ) : (
               <>

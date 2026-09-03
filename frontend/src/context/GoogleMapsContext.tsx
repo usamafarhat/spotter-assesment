@@ -1,15 +1,7 @@
-import { createContext, useContext, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { getGoogleMapsApiKey, GOOGLE_MAPS_LIBRARIES } from "../lib/googleMaps";
-
-type GoogleMapsContextValue = {
-  isLoaded: boolean;
-  loadError?: Error;
-};
-
-const GoogleMapsContext = createContext<GoogleMapsContextValue>({
-  isLoaded: false,
-});
+import { GoogleMapsContext } from "./useGoogleMaps";
 
 export function GoogleMapsProvider({ children }: { children: ReactNode }) {
   const { isLoaded, loadError } = useJsApiLoader({
@@ -23,8 +15,4 @@ export function GoogleMapsProvider({ children }: { children: ReactNode }) {
       {children}
     </GoogleMapsContext.Provider>
   );
-}
-
-export function useGoogleMaps() {
-  return useContext(GoogleMapsContext);
 }

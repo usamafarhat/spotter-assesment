@@ -1,5 +1,9 @@
 import type { TripResponseDto } from "@/api/EldPlanner/modules/trips/trips.types";
-import { buildEldLogDays, formatLogDateRangeLabel, type EldLogDay } from "./eldLogUtils";
+import {
+  buildEldLogDays,
+  formatLogDateRangeLabel,
+  type EldLogDay,
+} from "./eldLogUtils";
 
 export type TripLogEntry = {
   trip: TripResponseDto;

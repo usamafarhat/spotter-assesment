@@ -37,13 +37,15 @@ backend/
 ├── eld_planner/           # Django settings (loads .env via python-dotenv)
 ├── core/                  # Health check
 ├── trips/
-│   ├── models.py          # Trip model
+│   ├── models.py          # Trip + DutySegment
 │   ├── views/             # HTTP layer (thin)
-│   │   └── trips_collection.py   # GET + POST /api/trips/
+│   │   ├── trips_collection.py   # GET + POST /api/trips/
+│   │   └── trip_detail.py        # GET /api/trips/<id>/
 │   ├── serializers/       # Request/response validation only
 │   └── services/          # Business logic (no HTTP)
 │       ├── openrouteservice.py   # ORS HTTP client
-│       └── trip_planner.py       # create_planned_trip()
+│       ├── trip_planner.py       # create_planned_trip()
+│       └── hos/                  # HOS scheduler + duty segments
 ├── manage.py
 └── requirements.txt
 ```
@@ -54,7 +56,7 @@ backend/
 | ----- | ---- | -------- |
 | **View** | Parse HTTP, call serializer + service, return status/JSON | Call ORS directly |
 | **Serializer** | Validate input shape | Fetch routes or save with ORS |
-| **Service** | ORS routing, trip planning, future HOS | Know about `Request` / `Response` |
+| **Service** | ORS routing, trip planning, HOS schedule | Know about `Request` / `Response` |
 
 ## API
 
@@ -62,7 +64,8 @@ backend/
 | ------ | -------- | ----------- |
 | GET | `/api/health/` | Service health check |
 | GET | `/api/trips/` | List all trips (newest first) |
-| POST | `/api/trips/` | Create trip + fetch driving route |
+| GET | `/api/trips/<id>/` | Retrieve one trip (includes duty segments) |
+| POST | `/api/trips/` | Create trip + fetch driving route + HOS plan |
 
 ### POST `/api/trips/` — create trip
 
@@ -72,9 +75,10 @@ backend/
 Client → TripsCollectionView.post()
        → TripCreateSerializer (validate)
        → create_planned_trip() in trip_planner.py
-            → get_driving_route() in openrouteservice.py
+            → get_driving_route() in openrouteservice.py (current→pickup, pickup→delivery)
                  → ORS POST /v2/directions/driving-hgv/geojson
-            → Trip.objects.create(..., route_polyline, miles, hours)
+            → build_hos_plan() in hos/engine.py
+            → Trip + DutySegment rows
        → TripSerializer (response)
 ```
 
@@ -94,12 +98,15 @@ Client → TripsCollectionView.post()
 
 | Field | Description |
 | ----- | ----------- |
-| `route_polyline` | `[[lat, lng], ...]` — full path for map rendering |
-| `total_distance_miles` | Driving distance (ORS summary) |
-| `total_duration_hours` | Driving time only (HOS rests not applied yet) |
+| `route_to_pickup_polyline` | `[[lat, lng], ...]` — current → pickup |
+| `route_to_delivery_polyline` | `[[lat, lng], ...]` — pickup → delivery |
+| `total_distance_miles` | Driving distance (ORS summaries) |
+| `total_duration_hours` | Driving time only |
+| `total_trip_hours` | Calendar hours including rests and stops |
+| `duty_segments` | Ordered HOS timeline for ELD grids |
 | `status` | `"planned"` |
 
-**Routing waypoints:** current → pickup → delivery (3-leg path).
+**Routing waypoints:** current → pickup, then pickup → delivery (two ORS legs). Same-location pickup skips the first leg.
 
 ### OpenRouteService integration
 
@@ -144,12 +151,3 @@ Run migrations after model changes:
 python manage.py makemigrations
 python manage.py migrate
 ```
-
-## Planned extensions (add docs here when implemented)
-
-| Feature | Target file | Notes |
-| ------- | ----------- | ----- |
-| HOS engine | `trips/services/trip_planner.py` or `hos_engine.py` | Rests, fuel every 1000 mi, duty segments |
-| Duty segments model | `trips/models.py` | `off_duty`, `sleeper`, `driving`, `on_duty` |
-| Trip detail | `trips/views/trip_detail.py` | `GET /api/trips/<id>/` |
-| Trip logs API | `trips/views/trip_logs.py` | ELD log data for frontend grids |

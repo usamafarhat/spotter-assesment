@@ -7,7 +7,7 @@ export type LocationFieldKey = "currentLocation" | "pickupLocation" | "dropoffLo
 export const locationFieldLabels: Record<LocationFieldKey, string> = {
   currentLocation: "Current Location",
   pickupLocation: "Pickup Location",
-  dropoffLocation: "Dropoff Location",
+  dropoffLocation: "Delivery Location",
 };
 
 export type TripFormValues = {

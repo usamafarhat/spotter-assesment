@@ -15,7 +15,11 @@ export function LogsResultList({ groups, showTripTitles }: LogsResultListProps) 
   return (
     <div className="space-y-5">
       {groups.map((group) => (
-        <section key={group.trip.id} className="space-y-3" aria-label={tripRouteLabel(group.trip)}>
+        <section
+          key={group.trip.id}
+          className="space-y-3"
+          aria-label={tripRouteLabel(group.trip)}
+        >
           {showTripTitles ? (
             <div>
               <h3 className="text-sm font-bold text-foreground">

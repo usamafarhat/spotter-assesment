@@ -21,7 +21,7 @@ export const tripFormSchema = Yup.object({
     }),
   dropoffLocation: Yup.object(locationShape)
     .nullable()
-    .required("Dropoff location is required"),
+    .required("Delivery location is required"),
   pickupSameAsCurrent: Yup.boolean().required(),
   currentCycleUsedHrs: Yup.number()
     .transform((value, originalValue) =>

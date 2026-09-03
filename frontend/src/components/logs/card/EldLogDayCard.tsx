@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { cn } from "@/lib/cn";
 import { EldLogSheet } from "../EldLogGrid";
 import {
@@ -14,12 +14,10 @@ type EldLogDayCardProps = {
   defaultExpanded?: boolean;
 };
 
-export function EldLogDayCard({
-  entry,
-  defaultExpanded = false,
-}: EldLogDayCardProps) {
+export function EldLogDayCard({ entry, defaultExpanded = false }: EldLogDayCardProps) {
   const gridId = useId();
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null);
+  const expanded = expandedOverride ?? defaultExpanded;
   const { day, dayIndex, totalDays } = entry;
   const totals = statusTotalsForDay(day.blocks);
   const driveMinutes = totals.driving;
@@ -28,14 +26,8 @@ export function EldLogDayCard({
   const barTotal = driveMinutes + onDutyMinutes + restMinutes;
   const remark = day.remarks[0];
 
-  useEffect(() => {
-    if (defaultExpanded) {
-      setExpanded(true);
-    }
-  }, [defaultExpanded]);
-
   function toggleExpanded() {
-    setExpanded((current) => !current);
+    setExpandedOverride(!(expandedOverride ?? defaultExpanded));
   }
 
   return (
@@ -133,10 +125,7 @@ export function EldLogDayCard({
       </div>
 
       {expanded ? (
-        <div
-          id={gridId}
-          className="border-t border-slate-100 bg-slate-50/40 p-3"
-        >
+        <div id={gridId} className="border-t border-slate-100 bg-slate-50/40 p-3">
           <EldLogSheet day={day} />
         </div>
       ) : null}
@@ -146,12 +135,7 @@ export function EldLogDayCard({
 
 function EldGridIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      className={className}
-      aria-hidden
-    >
+    <svg viewBox="0 0 16 16" fill="none" className={className} aria-hidden>
       <rect
         x="1.25"
         y="1.25"
@@ -191,6 +175,10 @@ function BarSegment({
   }
 
   return (
-    <div className={`h-full ${className}`} style={{ width: `${width}%` }} title={label} />
+    <div
+      className={`h-full ${className}`}
+      style={{ width: `${width}%` }}
+      title={label}
+    />
   );
 }

@@ -61,9 +61,7 @@ function FilterTrigger({
       onClick={onClick}
       className={cn(
         "flex items-center justify-between gap-1 rounded-lg px-2.5 py-2 text-left transition",
-        active
-          ? "bg-blue-50 hover:bg-blue-100/70"
-          : "bg-slate-50 hover:bg-slate-100",
+        active ? "bg-blue-50 hover:bg-blue-100/70" : "bg-slate-50 hover:bg-slate-100",
         className,
       )}
     >

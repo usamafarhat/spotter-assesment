@@ -1,5 +1,5 @@
 import { ChevronRight, Truck } from "lucide-react";
-import { useNavigation } from "@/context/NavigationContext";
+import { useNavigation } from "@/context/useNavigation";
 import type { TripListItem } from "@/lib/tripDisplay";
 import { TripStatusBadge } from "../trip/TripStatusBadge";
 
@@ -34,10 +34,7 @@ export function RecentTripCard({ trip }: RecentTripCardProps) {
         </div>
       </div>
 
-      <ChevronRight
-        className="size-5 shrink-0 text-[#94a3b8]"
-        aria-hidden
-      />
+      <ChevronRight className="size-5 shrink-0 text-[#94a3b8]" aria-hidden />
     </button>
   );
 }

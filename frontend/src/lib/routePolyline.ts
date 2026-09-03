@@ -16,12 +16,7 @@ export type LatLng = {
 };
 
 export type RouteMarkerKind =
-  | "current"
-  | "pickup"
-  | "destination"
-  | "fuel"
-  | "break"
-  | "sleeper";
+  "current" | "pickup" | "destination" | "fuel" | "break" | "sleeper";
 
 export type RouteMapMarker = LatLng & {
   kind: RouteMarkerKind;
@@ -118,7 +113,8 @@ export function buildTripRouteMarkers(
       ...locationDtoToLatLng(current),
       id: "current",
       kind: "current",
-      label: "Current",
+      label: "Current location",
+      detail: current.address,
     });
   }
   if (pickup) {
@@ -127,6 +123,7 @@ export function buildTripRouteMarkers(
       id: "pickup",
       kind: "pickup",
       label: "Pickup",
+      detail: pickup.address,
     });
   }
   if (delivery) {
@@ -135,6 +132,7 @@ export function buildTripRouteMarkers(
       id: "destination",
       kind: "destination",
       label: "Destination",
+      detail: delivery.address,
     });
   }
 
@@ -155,9 +153,7 @@ function haversineMiles(
   const dLng = toRadians(lng2 - lng1);
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLng / 2) ** 2;
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLng / 2) ** 2;
   return 2 * EARTH_RADIUS_MILES * Math.asin(Math.sqrt(a));
 }
 
@@ -347,6 +343,15 @@ const MARKER_FILL: Record<RouteMarkerKind, string> = {
   sleeper: "#7c3aed",
 };
 
+const MARKER_FILL_EMPHASIZED: Record<RouteMarkerKind, string> = {
+  current: "#4ade80",
+  pickup: "#60a5fa",
+  destination: "#475569",
+  fuel: "#fbbf24",
+  break: "#22d3ee",
+  sleeper: "#a78bfa",
+};
+
 const MARKER_ICON_SVG: Record<RouteMarkerKind, () => string> = {
   current: currentIconSvg,
   pickup: pickupIconSvg,
@@ -356,9 +361,9 @@ const MARKER_ICON_SVG: Record<RouteMarkerKind, () => string> = {
   sleeper: sleeperIconSvg,
 };
 
-function isHosStopKind(
-  kind: RouteMarkerKind,
-): kind is "fuel" | "break" | "sleeper" {
+const EMPHASIZED_SCALE = 1.16;
+
+function isHosStopKind(kind: RouteMarkerKind): kind is "fuel" | "break" | "sleeper" {
   return kind === "fuel" || kind === "break" || kind === "sleeper";
 }
 
@@ -366,19 +371,28 @@ export function markerZIndex(kind: RouteMarkerKind): number {
   return isHosStopKind(kind) ? 1 : 4;
 }
 
-export function markerInfoWindowOffset(kind: RouteMarkerKind): number {
-  return isHosStopKind(kind) ? -24 : -32;
+export function markerPixelHeight(kind: RouteMarkerKind, emphasized = false): number {
+  const base = isHosStopKind(kind) ? STOP_MARKER_HEIGHT : MARKER_HEIGHT;
+  return emphasized ? Math.round(base * EMPHASIZED_SCALE) : base;
 }
 
 /** Same pin family for all markers. Rest/fuel stay smaller so main stops stay primary. */
-export function createRouteMarkerIcon(kind: RouteMarkerKind): google.maps.Icon {
+export function createRouteMarkerIcon(
+  kind: RouteMarkerKind,
+  options?: { emphasized?: boolean },
+): google.maps.Icon {
+  const emphasized = Boolean(options?.emphasized);
   const isStop = isHosStopKind(kind);
-  const width = isStop ? STOP_MARKER_WIDTH : MARKER_WIDTH;
-  const height = isStop ? STOP_MARKER_HEIGHT : MARKER_HEIGHT;
+  const baseWidth = isStop ? STOP_MARKER_WIDTH : MARKER_WIDTH;
+  const baseHeight = isStop ? STOP_MARKER_HEIGHT : MARKER_HEIGHT;
+  const width = emphasized ? Math.round(baseWidth * EMPHASIZED_SCALE) : baseWidth;
+  const height = emphasized ? Math.round(baseHeight * EMPHASIZED_SCALE) : baseHeight;
+  const fill = emphasized ? MARKER_FILL_EMPHASIZED[kind] : MARKER_FILL[kind];
+  const strokeWidth = emphasized ? 2.25 : 1.5;
   const icon = MARKER_ICON_SVG[kind]();
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${MARKER_VIEW_WIDTH}" height="${MARKER_VIEW_HEIGHT}" viewBox="0 0 ${MARKER_VIEW_WIDTH} ${MARKER_VIEW_HEIGHT}">
-  <path d="${PIN_PATH}" fill="${MARKER_FILL[kind]}" stroke="#ffffff" stroke-width="1.5"/>
+  <path d="${PIN_PATH}" fill="${fill}" stroke="#ffffff" stroke-width="${strokeWidth}"/>
   ${icon}
 </svg>`;
 
