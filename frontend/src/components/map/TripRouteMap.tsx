@@ -204,22 +204,22 @@ export function TripRouteMap({
             ))}
           </GoogleMap>
 
-          <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap gap-2 rounded-lg border border-border bg-card/95 px-2.5 py-1.5 text-[10px] font-medium text-foreground shadow-sm backdrop-blur">
-            <span className="flex items-center gap-1">
+          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-3 rounded-full border border-slate-200/80 bg-white/95 px-3 py-1.5 text-[11px] font-medium text-foreground shadow-sm backdrop-blur-sm">
+            <span className="flex items-center gap-1.5">
               <span
                 className="inline-block size-2.5 rounded-full bg-success"
                 aria-hidden
               />
               Current
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1.5">
               <span
                 className="inline-block size-2.5 rounded-full bg-info"
                 aria-hidden
               />
               Pickup
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1.5">
               <span
                 className="inline-block size-2.5 rounded-full bg-foreground"
                 aria-hidden
@@ -228,14 +228,14 @@ export function TripRouteMap({
             </span>
             {showPickupLeg && showDeliveryLeg ? (
               <>
-                <span className="flex items-center gap-1">
+                <span className="hidden items-center gap-1 sm:flex">
                   <span
                     className="inline-block h-0.5 w-3 rounded bg-info"
                     aria-hidden
                   />
                   To pickup
                 </span>
-                <span className="flex items-center gap-1">
+                <span className="hidden items-center gap-1 sm:flex">
                   <span
                     className="inline-block h-0.5 w-3 rounded bg-foreground"
                     aria-hidden

@@ -22,24 +22,25 @@ export function TripSchedule({ segments }: TripScheduleProps) {
   const ordered = [...segments].sort((a, b) => a.sequence - b.sequence);
 
   return (
-    <ol className="space-y-2">
+    <ol className="space-y-2.5">
       {ordered.map((segment) => (
-        <li key={segment.id} className="rounded-2xl border border-border bg-card p-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <span
-                className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${segmentAccentClass(segment)}`}
-              >
-                {formatSegmentTitle(segment)}
-              </span>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {formatSegmentTimeRange(segment)}
-              </p>
-            </div>
-            <p className="shrink-0 text-sm font-bold text-foreground">
+        <li
+          key={segment.id}
+          className="rounded-xl border border-slate-100 bg-card p-3.5 shadow-sm"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${segmentAccentClass(segment)}`}
+            >
+              {formatSegmentTitle(segment)}
+            </span>
+            <span className="shrink-0 text-xs font-semibold text-foreground">
               {formatSegmentDuration(segment)}
-            </p>
+            </span>
           </div>
+          <p className="mt-2 text-xs font-medium text-muted-foreground">
+            {formatSegmentTimeRange(segment)}
+          </p>
         </li>
       ))}
     </ol>

@@ -16,6 +16,25 @@ export function useTrips(enabled = true) {
   });
 }
 
+export function useTrip(tripId: number | null) {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ["trips", tripId],
+    queryFn: () => tripsApi.getById(tripId!),
+    enabled: tripId != null,
+    initialData: () => {
+      if (tripId == null) {
+        return undefined;
+      }
+
+      const trips = queryClient.getQueryData<TripResponseDto[]>(["trips"]);
+      return trips?.find((trip) => trip.id === tripId);
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
 export function useCreateTrip() {
   const queryClient = useQueryClient();
 
@@ -28,6 +47,7 @@ export function useCreateTrip() {
         }
         return [created, ...current.filter((trip) => trip.id !== created.id)];
       });
+      queryClient.setQueryData(["trips", created.id], created);
       void queryClient.invalidateQueries({ queryKey: ["trips"] });
     },
   });

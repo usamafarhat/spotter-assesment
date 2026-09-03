@@ -60,16 +60,16 @@ export function segmentAccentClass(segment: DutySegmentDto): string {
     return "bg-warning-subtle text-warning";
   }
   if (segment.stop_type === "pickup") {
-    return "bg-info-subtle text-info";
+    return "border border-info/20 bg-info-subtle text-info";
   }
   if (segment.stop_type === "delivery") {
-    return "bg-secondary text-foreground";
+    return "border border-border bg-secondary text-muted-foreground";
   }
   if (segment.stop_type === "rest" || segment.duty_status === "sleeper") {
-    return "bg-muted text-muted-foreground";
+    return "border border-border bg-muted text-muted-foreground";
   }
   if (segment.duty_status === "driving") {
-    return "bg-success-subtle text-success";
+    return "border border-success/20 bg-success-subtle text-success";
   }
-  return "bg-secondary text-foreground";
+  return "border border-border bg-secondary text-foreground";
 }

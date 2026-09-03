@@ -1,10 +1,8 @@
-import { useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useTrips } from "@/api/EldPlanner/modules/trips";
 import { RecentTripCard } from "@/components/home/RecentTripCard";
 import { RecentTripCardSkeleton } from "@/components/home/RecentTripCardSkeleton";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { TripDetailSkeleton, TripDetailView } from "@/components/trip/TripDetailView";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { useNavigation } from "@/context/NavigationContext";
@@ -14,47 +12,31 @@ import { toTripListItem } from "@/lib/tripDisplay";
 const LOAD_ERROR_MESSAGE = "Unable to load trips. Please try again.";
 
 export default function TripsPage() {
-  const { openPlanTrip, selectedTripId, closeTripDetail } = useNavigation();
+  const { openPlanTrip } = useNavigation();
   const { data: trips = [], isLoading, isError, error, refetch } = useTrips();
 
   const tripItems = trips.map((trip) => toTripListItem(trip));
-  const selectedTrip =
-    selectedTripId == null
-      ? undefined
-      : trips.find((trip) => trip.id === selectedTripId);
-
-  useEffect(() => {
-    if (selectedTripId == null || isLoading) {
-      return;
-    }
-    if (!trips.some((trip) => trip.id === selectedTripId)) {
-      closeTripDetail();
-    }
-  }, [selectedTripId, isLoading, trips, closeTripDetail]);
-
-  if (selectedTripId != null) {
-    if (selectedTrip) {
-      return <TripDetailView trip={selectedTrip} onBack={closeTripDetail} />;
-    }
-    if (isLoading) {
-      return <TripDetailSkeleton onBack={closeTripDetail} />;
-    }
-  }
 
   return (
-    <div className="flex flex-1 flex-col pb-4">
+    <div className="flex flex-1 flex-col">
       <AppHeader />
 
-      <div className="flex flex-1 flex-col gap-6 px-5 pt-6">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-4 pt-5">
         <section className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Trips</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+              Trips
+            </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               All planned and completed routes
             </p>
           </div>
-          <Button size="sm" className="shrink-0 rounded-xl" onClick={openPlanTrip}>
-            <Plus className="size-4" aria-hidden />
+          <Button
+            size="sm"
+            className="h-auto shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold"
+            onClick={openPlanTrip}
+          >
+            <Plus className="size-3.5 shrink-0" aria-hidden />
             New
           </Button>
         </section>
@@ -76,7 +58,7 @@ export default function TripsPage() {
           </Alert>
         )}
 
-        <section className="space-y-3">
+        <section aria-label="List of planned and completed trips" className="space-y-3">
           {isLoading ? (
             Array.from({ length: 4 }).map((_, index) => (
               <RecentTripCardSkeleton key={index} />
@@ -89,7 +71,7 @@ export default function TripsPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 Create a trip to see it listed here.
               </p>
-              <Button className="mt-4 rounded-xl" onClick={openPlanTrip}>
+              <Button className="mt-4 rounded-full" onClick={openPlanTrip}>
                 <Plus className="size-4" aria-hidden />
                 Plan New Trip
               </Button>

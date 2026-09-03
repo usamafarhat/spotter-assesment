@@ -3,25 +3,25 @@
 
 @layer base {
   :root {
-    --background: #f8f9fa;
-    --foreground: #111827;
+    --background: #f8fafd;
+    --foreground: #0b0f19;
     --card: #ffffff;
-    --card-foreground: #111827;
-    --primary: #000000;
+    --card-foreground: #0b0f19;
+    --primary: #0b0f19;
     --primary-foreground: #ffffff;
-    --secondary: #f3f4f6;
-    --secondary-foreground: #374151;
-    --muted: #f3f4f6;
-    --muted-foreground: #6b7280;
-    --accent: #f3f4f6;
-    --accent-foreground: #111827;
+    --secondary: #eef2f6;
+    --secondary-foreground: #64748b;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --accent: #f1f5f9;
+    --accent-foreground: #0b0f19;
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
-    --border: #e5e7eb;
-    --input: #e5e7eb;
-    --ring: #9ca3af;
+    --border: #edf0f4;
+    --input: #e2e8f0;
+    --ring: #94a3b8;
     --radius: 1rem;
-    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 
     --success: #16a34a;
     --success-subtle: #dcfce7;
@@ -39,5 +39,9 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
   }
 }

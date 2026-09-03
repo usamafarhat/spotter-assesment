@@ -1,36 +1,29 @@
+import { cn } from "@/lib/cn";
 import {
   buildGrandTotalDisplay,
   buildStatusTotalsDisplay,
   ELD_DUTY_ROWS,
 } from "../lib/eldLogUtils";
-import { ELD_CHART_LAYOUT, ELD_GRID_TOP } from "../chart/chartLayout";
 
 type EldLogTotalsPanelProps = {
   blocks: Parameters<typeof buildStatusTotalsDisplay>[0];
 };
 
-function DigitCell({ digit }: { digit: string }) {
-  return (
-    <span className="flex h-7 w-6 items-center justify-center border border-[#2563eb] bg-white text-base font-bold leading-none text-foreground">
-      {digit}
-    </span>
-  );
-}
+const DIGIT_CLASS: Record<string, string> = {
+  off_duty: "border-blue-300 bg-white text-slate-800",
+  sleeper: "border-blue-300 bg-white text-slate-800",
+  driving: "border-emerald-400 bg-emerald-50/50 text-emerald-900",
+  on_duty: "border-amber-300 bg-amber-50/50 text-amber-900",
+  total: "border-blue-400 bg-blue-50 text-blue-900",
+};
 
-function HoursMinutesEntry({ hours, minutes }: { hours: string; minutes: string }) {
-  return (
-    <div className="flex gap-1.5">
-      <div className="flex">
-        <DigitCell digit={hours[0]} />
-        <DigitCell digit={hours[1]} />
-      </div>
-      <div className="flex">
-        <DigitCell digit={minutes[0]} />
-        <DigitCell digit={minutes[1]} />
-      </div>
-    </div>
-  );
-}
+const COLON_CLASS: Record<string, string> = {
+  off_duty: "text-slate-400",
+  sleeper: "text-slate-400",
+  driving: "text-emerald-500",
+  on_duty: "text-amber-500",
+  total: "text-blue-500",
+};
 
 export function EldLogTotalsPanel({ blocks }: EldLogTotalsPanelProps) {
   const statusTotals = buildStatusTotalsDisplay(blocks);
@@ -38,51 +31,40 @@ export function EldLogTotalsPanel({ blocks }: EldLogTotalsPanelProps) {
 
   return (
     <aside
-      className="w-[7.25rem] shrink-0 border-l border-[#2563eb]/40 bg-white px-2 py-3"
+      className="rounded-xl border border-slate-200 bg-slate-50/70 p-2.5"
       aria-label="Total hours by duty status"
     >
-      <div style={{ paddingTop: ELD_CHART_LAYOUT.marginTop }}>
-        <div
-          className="mb-0 flex gap-1.5 px-0.5"
-          style={{ height: ELD_CHART_LAYOUT.axisHeight }}
-        >
-          <p className="flex w-[3.25rem] items-end justify-center pb-0.5 text-center text-[8px] font-bold uppercase leading-none text-[#2563eb]">
-            Hours
-          </p>
-          <p className="flex w-[3.25rem] flex-col items-center justify-end text-center text-[7px] font-bold uppercase leading-tight text-[#2563eb]">
-            <span>Minutes</span>
-            <span className="mt-0.5 font-semibold normal-case text-[#2563eb]/75">
-              00, 15, 30, 45
+      <div className="mb-2 flex items-center justify-between px-0.5">
+        <span className="text-[9px] font-extrabold tracking-tight text-blue-700 uppercase">
+          Hours &amp; Mins
+        </span>
+        <span className="text-[8px] text-slate-500">00, 15, 30, 45</span>
+      </div>
+
+      <div className="space-y-1.5">
+        {statusTotals.map((row) => (
+          <div key={row.status} className="flex items-center justify-between gap-2">
+            <span className="text-[10px] font-bold text-slate-600 uppercase">
+              {row.label}
             </span>
-          </p>
-        </div>
-
-        <div
-          style={{
-            marginTop:
-              ELD_GRID_TOP - ELD_CHART_LAYOUT.marginTop - ELD_CHART_LAYOUT.axisHeight,
-          }}
-        >
-          {statusTotals.map((row) => (
-            <div
-              key={row.status}
-              className="flex items-center px-0.5"
-              style={{ height: ELD_CHART_LAYOUT.rowHeight }}
-              title={row.label}
-            >
-              <HoursMinutesEntry hours={row.hours} minutes={row.minutes} />
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 border-t border-[#2563eb]/30 pt-3">
-          <p className="mb-2 text-center text-[9px] font-bold uppercase tracking-wide text-[#2563eb]">
-            Total Hours
-          </p>
-          <div className="flex justify-center">
-            <HoursMinutesEntry hours={grandTotal.hours} minutes={grandTotal.minutes} />
+            <HoursMinutesEntry
+              hours={row.hours}
+              minutes={row.minutes}
+              tone={row.status}
+            />
           </div>
-        </div>
+        ))}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
+        <span className="text-[8px] font-extrabold tracking-tight text-blue-700 uppercase">
+          Total 24 Hours
+        </span>
+        <HoursMinutesEntry
+          hours={grandTotal.hours}
+          minutes={grandTotal.minutes}
+          tone="total"
+        />
       </div>
 
       <ul className="sr-only">
@@ -97,5 +79,38 @@ export function EldLogTotalsPanel({ blocks }: EldLogTotalsPanelProps) {
         </li>
       </ul>
     </aside>
+  );
+}
+
+function HoursMinutesEntry({
+  hours,
+  minutes,
+  tone,
+}: {
+  hours: string;
+  minutes: string;
+  tone: string;
+}) {
+  return (
+    <div className="flex gap-0.5">
+      <DigitCell digit={hours[0]} tone={tone} />
+      <DigitCell digit={hours[1]} tone={tone} />
+      <span className={cn("self-center font-bold", COLON_CLASS[tone])}>:</span>
+      <DigitCell digit={minutes[0]} tone={tone} />
+      <DigitCell digit={minutes[1]} tone={tone} />
+    </div>
+  );
+}
+
+function DigitCell({ digit, tone }: { digit: string; tone: string }) {
+  return (
+    <span
+      className={cn(
+        "flex h-5 w-4 items-center justify-center rounded border font-mono text-[11px] font-bold",
+        DIGIT_CLASS[tone],
+      )}
+    >
+      {digit}
+    </span>
   );
 }

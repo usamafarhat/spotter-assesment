@@ -73,3 +73,24 @@ export function formatCycleHours(value: string, maxHours = 70): string {
 
   return `${hours.toLocaleString("en-US", { maximumFractionDigits: 1 })} / ${maxHours} hr`;
 }
+
+export function shortPlaceName(address: string): string {
+  const parts = address
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length >= 2) {
+    return parts[1];
+  }
+
+  return parts[0] ?? address;
+}
+
+export function tripFilterLabel(trip: TripResponseDto): string {
+  return `#${trip.id} • ${shortPlaceName(trip.pickup_location.address)}`;
+}
+
+export function tripRouteLabel(trip: TripResponseDto): string {
+  return `${shortPlaceName(trip.pickup_location.address)} → ${shortPlaceName(trip.delivery_location.address)}`;
+}

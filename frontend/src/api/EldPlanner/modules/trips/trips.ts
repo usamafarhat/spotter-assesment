@@ -17,4 +17,10 @@ export const tripsApi = {
    */
   create: (data: CreateTripDto): Promise<TripResponseDto> =>
     eldPlannerApiClient.post<TripResponseDto>("/trips/", data),
+
+  /**
+   * GET /api/trips/<id>/
+   */
+  getById: (id: number): Promise<TripResponseDto> =>
+    eldPlannerApiClient.get<TripResponseDto>(`/trips/${id}/`),
 };

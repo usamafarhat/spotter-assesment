@@ -7,18 +7,22 @@ import {
   type ReactNode,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PLAN_TRIP_PATH, TAB_PATHS, type AppTab } from "../types/navigation";
+import {
+  PLAN_TRIP_PATH,
+  TAB_PATHS,
+  logsPath,
+  tripDetailPath,
+  type AppTab,
+} from "../types/navigation";
 
 type NavigationContextValue = {
   activeTab: AppTab;
   isPlanTripOpen: boolean;
-  selectedTripId: number | null;
   selectedLogsTripId: number | null;
   navigateToTab: (tab: AppTab) => void;
   openPlanTrip: () => void;
   closePlanTrip: () => void;
   openTripDetail: (tripId: number) => void;
-  closeTripDetail: () => void;
   openLogsForTrip: (tripId: number) => void;
   setSelectedLogsTripId: (tripId: number | null) => void;
 };
@@ -34,28 +38,19 @@ function getActiveTab(pathname: string): AppTab {
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [selectedLogsTripId, setSelectedLogsTripId] = useState<number | null>(null);
 
   const activeTab = getActiveTab(location.pathname);
   const isPlanTripOpen = location.pathname === PLAN_TRIP_PATH;
 
-  const closeTripDetail = useCallback(() => {
-    setSelectedTripId(null);
-  }, []);
-
   const navigateToTab = useCallback(
     (tab: AppTab) => {
-      if (tab === "trips") {
-        setSelectedTripId(null);
-      }
       navigate(TAB_PATHS[tab]);
     },
     [navigate],
   );
 
   const openPlanTrip = useCallback(() => {
-    setSelectedTripId(null);
     navigate(PLAN_TRIP_PATH);
   }, [navigate]);
 
@@ -65,8 +60,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 
   const openTripDetail = useCallback(
     (tripId: number) => {
-      setSelectedTripId(tripId);
-      navigate(TAB_PATHS.trips);
+      navigate(tripDetailPath(tripId));
     },
     [navigate],
   );
@@ -74,7 +68,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   const openLogsForTrip = useCallback(
     (tripId: number) => {
       setSelectedLogsTripId(tripId);
-      navigate(TAB_PATHS.logs);
+      navigate(logsPath({ tripId }));
     },
     [navigate],
   );
@@ -83,26 +77,22 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     () => ({
       activeTab,
       isPlanTripOpen,
-      selectedTripId,
       selectedLogsTripId,
       navigateToTab,
       openPlanTrip,
       closePlanTrip,
       openTripDetail,
-      closeTripDetail,
       openLogsForTrip,
       setSelectedLogsTripId,
     }),
     [
       activeTab,
       isPlanTripOpen,
-      selectedTripId,
       selectedLogsTripId,
       navigateToTab,
       openPlanTrip,
       closePlanTrip,
       openTripDetail,
-      closeTripDetail,
       openLogsForTrip,
     ],
   );

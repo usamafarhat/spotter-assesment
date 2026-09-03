@@ -49,43 +49,46 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
       label: "Current",
       location: trip.current_location,
       icon: LocateFixed,
-      accentClassName: "bg-success-subtle text-success",
+      accentClassName:
+        "border border-success/20 bg-success-subtle text-success",
     },
     {
       key: "pickup",
       label: "Pickup",
       location: trip.pickup_location,
       icon: Package,
-      accentClassName: "bg-info-subtle text-info",
+      accentClassName: "border border-info/20 bg-info-subtle text-info",
     },
     {
       key: "delivery",
       label: "Destination",
       location: trip.delivery_location,
       icon: MapPin,
-      accentClassName: "bg-secondary text-foreground",
+      accentClassName: "border border-border bg-secondary text-foreground",
     },
   ];
 
   return (
     <div className="flex flex-1 flex-col bg-card">
-      <header className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3">
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+      <header className="sticky top-0 z-30 border-b border-slate-100 bg-card/95 px-4 py-3.5 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="size-9 p-0"
+            className="-ml-1 size-9 p-1 active:scale-95"
             aria-label="Back to trips"
           >
             <ArrowLeft className="size-5" aria-hidden />
           </Button>
-          <p className="text-center text-base font-bold text-foreground">Trip</p>
-          <TripStatusBadge status={trip.status} showDot={false} />
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold leading-none text-foreground">Trip</h1>
+            <TripStatusBadge status={trip.status} showDot={false} />
+          </div>
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-5 px-5 pt-5 pb-6">
+      <main className="flex-1 overflow-y-auto">
         {hasRoute ? (
           <TripRouteMap
             routeToPickupPolyline={trip.route_to_pickup_polyline}
@@ -93,9 +96,10 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
             currentLocation={trip.current_location}
             pickupLocation={trip.pickup_location}
             deliveryLocation={trip.delivery_location}
+            className="aspect-auto h-72 rounded-none border-0 border-b border-slate-200"
           />
         ) : (
-          <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-secondary px-6 text-center">
+          <div className="flex h-72 w-full flex-col items-center justify-center gap-2 border-b border-slate-200 bg-secondary px-6 text-center">
             <Route className="size-6 text-muted-foreground" aria-hidden />
             <p className="text-sm font-medium text-foreground">No route to show</p>
             <p className="text-xs text-muted-foreground">
@@ -104,114 +108,118 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
           </div>
         )}
 
-        <section>
-          <h1 className="text-lg font-bold leading-snug tracking-tight text-foreground">
-            {trip.pickup_location.address} → {trip.delivery_location.address}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Planned {formatRecentTripDateLabel(trip.created_at)}
-          </p>
-        </section>
-
-        <section className="grid grid-cols-2 gap-2">
-          <StatCard
-            label="Distance"
-            value={formatDistanceMiles(trip.total_distance_miles)}
-          />
-          <StatCard
-            label="Drive time"
-            value={formatDurationHours(trip.total_duration_hours)}
-          />
-          <StatCard
-            label="Total trip"
-            value={formatDurationHours(trip.total_trip_hours)}
-          />
-          <StatCard
-            label="Cycle used"
-            value={formatCycleHours(trip.current_cycle_used_hrs)}
-          />
-        </section>
-
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Clock className="size-4 text-muted-foreground" aria-hidden />
-            <h2 className="text-sm font-bold text-foreground">HOS schedule</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Driving, rests, fuel, and on-duty stops in order.
-          </p>
-          <TripSchedule segments={trip.duty_segments ?? []} />
-          {hasDutySegments ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full rounded-xl"
-              onClick={() => openLogsForTrip(trip.id)}
-            >
-              <FileText className="size-4" aria-hidden />
-              View ELD logs
-            </Button>
-          ) : null}
-        </section>
-
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <MapPin className="size-4 text-muted-foreground" aria-hidden />
-            <h2 className="text-sm font-bold text-foreground">Locations</h2>
-          </div>
-
-          <ol className="space-y-0">
-            {stops.map((stop, index) => {
-              const Icon = stop.icon;
-              const isLast = index === stops.length - 1;
-
-              return (
-                <li key={stop.key} className="flex gap-3">
-                  <div className="flex w-8 shrink-0 flex-col items-center">
-                    <span
-                      className={`flex size-8 items-center justify-center rounded-full ${stop.accentClassName}`}
-                    >
-                      <Icon className="size-3.5" aria-hidden />
-                    </span>
-                    {!isLast && (
-                      <span className="min-h-6 w-px flex-1 bg-border" aria-hidden />
-                    )}
-                  </div>
-                  <div className={isLast ? "pb-0 pt-1" : "pb-4 pt-1"}>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {stop.label}
-                    </p>
-                    <p className="mt-0.5 text-sm font-medium leading-snug text-foreground">
-                      {stop.location.address}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
-
-        {trip.notes.trim() ? (
-          <section className="rounded-2xl border border-border bg-secondary/60 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Notes
-            </p>
-            <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-              {trip.notes}
+        <div className="space-y-6 p-4">
+          <section>
+            <h2 className="text-base font-bold leading-snug text-foreground">
+              {trip.pickup_location.address} → {trip.delivery_location.address}
+            </h2>
+            <p className="mt-1 text-xs font-medium text-muted-foreground">
+              Planned {formatRecentTripDateLabel(trip.created_at)}
             </p>
           </section>
-        ) : null}
-      </div>
+
+          <section className="grid grid-cols-2 gap-3">
+            <StatCard
+              label="Distance"
+              value={formatDistanceMiles(trip.total_distance_miles)}
+            />
+            <StatCard
+              label="Drive time"
+              value={formatDurationHours(trip.total_duration_hours)}
+            />
+            <StatCard
+              label="Total trip"
+              value={formatDurationHours(trip.total_trip_hours)}
+            />
+            <StatCard
+              label="Cycle used"
+              value={formatCycleHours(trip.current_cycle_used_hrs)}
+            />
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex items-center gap-1.5">
+              <Clock className="size-4 text-foreground" aria-hidden />
+              <h2 className="text-sm font-bold text-foreground">HOS schedule</h2>
+            </div>
+            <p className="text-xs font-normal text-muted-foreground">
+              Driving, rests, fuel, and on-duty stops in order.
+            </p>
+            <TripSchedule segments={trip.duty_segments ?? []} />
+            {hasDutySegments ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-auto w-full rounded-full border-slate-200/80 bg-slate-50 py-2.5 text-xs font-semibold text-foreground hover:bg-slate-100 active:bg-slate-200"
+                onClick={() => openLogsForTrip(trip.id)}
+              >
+                <FileText className="size-3.5 text-muted-foreground" aria-hidden />
+                View ELD logs
+              </Button>
+            ) : null}
+          </section>
+
+          <section className="space-y-4">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="size-4 text-foreground" aria-hidden />
+              <h2 className="text-sm font-bold text-foreground">Locations</h2>
+            </div>
+
+            <ol className="relative space-y-6 pl-1">
+              {stops.map((stop, index) => {
+                const Icon = stop.icon;
+                const isLast = index === stops.length - 1;
+
+                return (
+                  <li key={stop.key} className="flex items-start gap-3">
+                    <div className="relative flex flex-col items-center">
+                      <span
+                        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${stop.accentClassName}`}
+                      >
+                        <Icon className="size-4" aria-hidden />
+                      </span>
+                      {!isLast && (
+                        <span
+                          className="absolute top-8 h-10 w-0.5 bg-slate-200"
+                          aria-hidden
+                        />
+                      )}
+                    </div>
+                    <div className="pt-0.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        {stop.label}
+                      </p>
+                      <p className="mt-0.5 text-xs font-semibold leading-snug text-foreground">
+                        {stop.location.address}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+
+          {trip.notes.trim() ? (
+            <section className="rounded-xl border border-slate-100 bg-slate-50/80 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Notes
+              </p>
+              <p className="mt-1.5 whitespace-pre-wrap text-xs font-semibold leading-relaxed text-foreground">
+                {trip.notes}
+              </p>
+            </section>
+          ) : null}
+        </div>
+      </main>
     </div>
   );
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-secondary/70 px-3 py-3">
-      <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1 truncate text-sm font-bold text-foreground">{value}</p>
+    <div className="flex flex-col justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3.5">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 truncate text-lg font-bold text-foreground">{value}</p>
     </div>
   );
 }
@@ -219,42 +227,42 @@ function StatCard({ label, value }: { label: string; value: string }) {
 export function TripDetailSkeleton({ onBack }: { onBack: () => void }) {
   return (
     <div className="flex flex-1 flex-col bg-card">
-      <header className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3">
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+      <header className="sticky top-0 z-30 border-b border-slate-100 bg-card/95 px-4 py-3.5 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="size-9 p-0"
+            className="-ml-1 size-9 p-1"
             aria-label="Back to trips"
           >
             <ArrowLeft className="size-5" aria-hidden />
           </Button>
-          <p className="text-center text-base font-bold text-foreground">Trip</p>
-          <Skeleton className="h-5 w-16 rounded-full" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-10" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
         </div>
       </header>
 
-      <div
-        className="flex flex-1 flex-col gap-5 px-5 pt-5"
-        aria-busy="true"
-        aria-label="Loading trip"
-      >
-        <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
-        <div className="space-y-2">
-          <Skeleton className="h-6 w-4/5" />
-          <Skeleton className="h-4 w-32" />
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <Skeleton className="h-16 rounded-2xl" />
-          <Skeleton className="h-16 rounded-2xl" />
-          <Skeleton className="h-16 rounded-2xl" />
-          <Skeleton className="h-16 rounded-2xl" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-20 rounded-2xl" />
-          <Skeleton className="h-20 rounded-2xl" />
+      <div className="flex-1 overflow-y-auto" aria-busy="true" aria-label="Loading trip">
+        <Skeleton className="h-72 w-full rounded-none" />
+        <div className="space-y-6 p-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-full max-w-sm" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Skeleton className="h-[4.75rem] rounded-xl" />
+            <Skeleton className="h-[4.75rem] rounded-xl" />
+            <Skeleton className="h-[4.75rem] rounded-xl" />
+            <Skeleton className="h-[4.75rem] rounded-xl" />
+          </div>
+          <div className="space-y-2.5">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-[4.5rem] rounded-xl" />
+            <Skeleton className="h-[4.5rem] rounded-xl" />
+          </div>
         </div>
       </div>
     </div>

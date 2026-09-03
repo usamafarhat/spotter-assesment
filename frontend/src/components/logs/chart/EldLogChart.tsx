@@ -25,9 +25,7 @@ export function EldLogChart({ day }: EldLogChartProps) {
   return (
     <svg
       viewBox={`0 0 ${ELD_CHART_WIDTH} ${ELD_CHART_HEIGHT}`}
-      width={ELD_CHART_WIDTH}
-      height={ELD_CHART_HEIGHT}
-      className="block"
+      className="block h-auto w-full"
       role="img"
       aria-label={`ELD log chart for ${day.dateLabel}`}
     >

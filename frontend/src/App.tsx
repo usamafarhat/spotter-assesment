@@ -7,6 +7,7 @@ import { NavigationProvider } from "./context/NavigationContext";
 import HomePage from "./pages/home/HomePage";
 import LogsPage from "./pages/logs/LogsPage";
 import PlanTripPage from "./pages/trips/PlanTripPage";
+import TripDetailPage from "./pages/trips/TripDetailPage";
 import TripsPage from "./pages/trips/TripsPage";
 import ViewAllComponents from "./pages/ViewAllComponents";
 
@@ -18,8 +19,9 @@ export default function App() {
           <Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<HomePage />} />
-              <Route path="/trips" element={<TripsPage />} />
               <Route path="/trips/plan-trip" element={<PlanTripPage />} />
+              <Route path="/trips/:tripId" element={<TripDetailPage />} />
+              <Route path="/trips" element={<TripsPage />} />
               <Route path="/logs" element={<LogsPage />} />
             </Route>
             <Route path="/view-all-components" element={<ViewAllComponents />} />

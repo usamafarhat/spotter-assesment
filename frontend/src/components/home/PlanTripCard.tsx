@@ -7,14 +7,16 @@ type PlanTripCardProps = {
 
 export function PlanTripCard({ onPlanTrip }: PlanTripCardProps) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-      <div className="flex items-start gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+    <section className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+      <div className="flex items-start gap-3.5">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
           <MapPinned className="size-5" aria-hidden />
         </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base font-bold text-foreground">Plan a trip</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="flex flex-col pt-0.5">
+          <h2 className="text-[17px] font-bold leading-tight tracking-tight text-foreground">
+            Plan a trip
+          </h2>
+          <p className="mt-1 text-[13px] font-normal leading-relaxed text-muted-foreground">
             Add current location, pickup, and delivery to build a route.
           </p>
         </div>
@@ -22,10 +24,10 @@ export function PlanTripCard({ onPlanTrip }: PlanTripCardProps) {
 
       <Button
         size="lg"
-        className="mt-5 h-12 w-full rounded-2xl text-sm font-semibold"
+        className="h-12 w-full rounded-full text-[15px] font-semibold shadow-sm"
         onClick={onPlanTrip}
       >
-        <Plus className="size-5" aria-hidden />
+        <Plus className="size-5 shrink-0" aria-hidden />
         Plan New Trip
       </Button>
     </section>

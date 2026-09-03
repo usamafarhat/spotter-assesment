@@ -5,7 +5,10 @@ export {
   buildStatusTotalsDisplay,
   ELD_DUTY_ROWS,
   ELD_HOUR_LABELS,
+  formatCompactHoursMinutes,
+  formatLogDateRangeLabel,
   formatLogDayLabel,
+  formatLogDayShortLabel,
   formatLogMinuteLabel,
   MINUTES_PER_DAY,
   roundMinutesToQuarter,
@@ -19,3 +22,16 @@ export type {
   EldStatusTotal,
   EldStepPoint,
 } from "./eldLogUtils";
+
+export {
+  buildTripLogEntries,
+  collectLogDateKeys,
+  dateSheetSubtitle,
+  filterTripLogEntries,
+  groupTripLogEntries,
+  latestTripId,
+  parseLogDateKey,
+  parseTripFilterParam,
+} from "./logsFilter";
+
+export type { TripLogEntry, TripLogGroup } from "./logsFilter";

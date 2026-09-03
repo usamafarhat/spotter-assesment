@@ -19,15 +19,15 @@ export default function HomePage() {
   const recentTrips = getRecentTrips(trips, 3);
 
   return (
-    <div className="flex flex-1 flex-col pb-4">
+    <div className="flex flex-1 flex-col">
       <AppHeader />
 
-      <div className="flex flex-1 flex-col gap-6 px-5 pt-6">
-        <section>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-4 pt-5">
+        <section className="flex flex-col gap-1">
+          <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-foreground">
             Welcome back, Jack
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-sm font-normal leading-snug text-muted-foreground">
             Plan a route when you are ready for the next run.
           </p>
         </section>
@@ -51,37 +51,42 @@ export default function HomePage() {
           </Alert>
         )}
 
-        <section className="space-y-3">
-          <h2 className="text-base font-bold text-foreground">Recent Trips</h2>
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-bold tracking-tight text-foreground">
+            Recent Trips
+          </h2>
 
           {isLoading ? (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-2.5">
               {Array.from({ length: 3 }).map((_, index) => (
                 <RecentTripCardSkeleton key={index} />
               ))}
             </div>
           ) : recentTrips.length > 0 ? (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-2.5">
               {recentTrips.map((trip) => (
                 <RecentTripCard key={trip.id} trip={trip} />
               ))}
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 w-full rounded-2xl text-sm font-semibold"
+                className="mt-1.5 h-12 w-full rounded-2xl border-input bg-card text-sm font-medium shadow-[0_1px_4px_rgba(0,0,0,0.01)] hover:bg-slate-50 active:bg-slate-100"
                 onClick={() => navigateToTab("trips")}
               >
                 View all trips
               </Button>
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
+            <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
               <p className="text-sm font-medium text-foreground">No trips yet</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Plan a trip to see it listed here.
               </p>
-              <Button className="mt-4 rounded-xl" onClick={openPlanTrip}>
-                <Plus className="size-4" aria-hidden />
+              <Button
+                className="mt-4 h-12 rounded-full px-6 text-[15px] font-semibold"
+                onClick={openPlanTrip}
+              >
+                <Plus className="size-5" aria-hidden />
                 Plan New Trip
               </Button>
             </div>

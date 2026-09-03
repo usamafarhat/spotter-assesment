@@ -4,56 +4,82 @@ import { cn } from "../../lib/cn";
 import { useNavigation } from "../../context/NavigationContext";
 import type { AppTab } from "../../types/navigation";
 
-const tabs: { id: AppTab; label: string; icon: LucideIcon }[] = [
-  { id: "home", label: "Dashboard", icon: LayoutGrid },
+type TabConfig = {
+  id: AppTab;
+  label: string;
+  icon: LucideIcon;
+};
+
+const tabs: TabConfig[] = [
   { id: "trips", label: "Trip", icon: Route },
+  { id: "home", label: "Dashboard", icon: LayoutGrid },
   { id: "logs", label: "Logs", icon: History },
 ];
+
+function TabButton({
+  tab,
+  isActive,
+  onSelect,
+}: {
+  tab: TabConfig;
+  isActive: boolean;
+  onSelect: () => void;
+}) {
+  const Icon = tab.icon;
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-current={isActive ? "page" : undefined}
+      className="flex min-w-16 flex-col items-center justify-center gap-1 text-[11px] tracking-tight"
+    >
+      <span
+        className={cn(
+          "flex size-8 items-center justify-center transition-colors",
+          isActive && "rounded-lg bg-info-subtle",
+        )}
+      >
+        <Icon
+          className={cn(
+            "size-[22px]",
+            isActive
+              ? "stroke-[2.5] text-info"
+              : "stroke-2 text-muted-foreground",
+          )}
+          aria-hidden
+        />
+      </span>
+      <span
+        className={cn(
+          isActive
+            ? "font-bold text-info"
+            : "font-medium text-muted-foreground hover:text-foreground",
+        )}
+      >
+        {tab.label}
+      </span>
+    </button>
+  );
+}
 
 export function BottomTabBar() {
   const { activeTab, navigateToTab } = useNavigation();
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-[#f1f5f9] bg-card pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.02)]"
       aria-label="Main navigation"
     >
-      <div className="mx-auto flex h-16 max-w-md items-stretch px-4">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          const Icon = tab.icon;
-
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => navigateToTab(tab.id)}
-              className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] transition-colors",
-                isActive
-                  ? "font-bold text-foreground"
-                  : "font-medium text-muted-foreground hover:text-foreground",
-              )}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <span
-                className={cn(
-                  "flex size-9 items-center justify-center rounded-full transition-colors",
-                  isActive && "bg-info-subtle",
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "size-5 transition-colors",
-                    isActive ? "stroke-[2.5] text-info" : "stroke-[2]",
-                  )}
-                  aria-hidden
-                />
-              </span>
-              {tab.label}
-            </button>
-          );
-        })}
+      <div className="mx-auto flex h-16 max-w-md items-center justify-around px-4">
+        {tabs.map((tab) => (
+          <TabButton
+            key={tab.id}
+            tab={tab}
+            isActive={activeTab === tab.id}
+            onSelect={() => navigateToTab(tab.id)}
+          />
+        ))}
       </div>
     </nav>
   );

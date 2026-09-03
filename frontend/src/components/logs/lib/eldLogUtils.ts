@@ -100,6 +100,45 @@ export function formatLogDayLabel(dateKeyValue: string): string {
   });
 }
 
+export function formatLogDayShortLabel(dateKeyValue: string): string {
+  const [year, month, day] = dateKeyValue.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function formatLogDateRangeLabel(startKey: string, endKey: string): string {
+  const start = new Date(parseDateKey(startKey));
+  const end = new Date(parseDateKey(endKey));
+
+  if (startKey === endKey) {
+    return end.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  const startLabel = start.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+  const endLabel = end.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  return `${startLabel} – ${endLabel}`;
+}
+
+function parseDateKey(dateKeyValue: string): number {
+  const [year, month, day] = dateKeyValue.split("-").map(Number);
+  return new Date(year, month - 1, day).getTime();
+}
+
 export function formatLogMinuteLabel(minute: number): string {
   const normalized = ((minute % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
   const hour24 = Math.floor(normalized / 60);
@@ -233,6 +272,13 @@ export function formatHoursFromMinutes(minutes: number): string {
 /** FMCSA logs round minutes to 00, 15, 30, or 45. */
 export function roundMinutesToQuarter(minutes: number): number {
   return Math.round(minutes / 15) * 15;
+}
+
+export function formatCompactHoursMinutes(minutes: number): string {
+  const rounded = roundMinutesToQuarter(Math.max(0, minutes));
+  const hours = Math.floor(rounded / 60);
+  const mins = rounded % 60;
+  return `${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`;
 }
 
 export type EldStatusTotal = {
