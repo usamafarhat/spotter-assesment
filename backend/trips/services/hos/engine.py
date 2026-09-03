@@ -95,33 +95,50 @@ class DriverSession:
         if duty_status in {"driving", "on_duty"}:
             self.cycle_hours_used += hours
 
+    def _coords_at_odometer(self) -> tuple[float | None, float | None]:
+        point = point_at_trip_miles(self.combined_polyline, self.odometer_miles)
+        if point is None:
+            return None, None
+        return point
+
+    def _append_stop(
+        self,
+        duty_status: str,
+        hours: float,
+        stop_type: str,
+    ) -> None:
+        latitude, longitude = self._coords_at_odometer()
+        self._append(
+            duty_status,
+            hours,
+            stop_type=stop_type,
+            miles_at_start=self.odometer_miles,
+            miles_at_end=self.odometer_miles,
+            latitude=latitude,
+            longitude=longitude,
+        )
+
     def take_break(self) -> None:
-        self._append("off_duty", BREAK_DURATION_HOURS, stop_type="rest")
+        self._append_stop("off_duty", BREAK_DURATION_HOURS, stop_type="rest")
         self.driving_since_break = 0.0
 
     def take_daily_reset(self) -> None:
-        self._append("sleeper", MIN_OFF_DUTY_RESET_HOURS, stop_type="rest")
+        self._append_stop("sleeper", MIN_OFF_DUTY_RESET_HOURS, stop_type="rest")
         self.driving_since_reset = 0.0
         self.driving_since_break = 0.0
 
     def take_cycle_recovery(self) -> None:
-        self._append("sleeper", CYCLE_RECOVERY_REST_HOURS, stop_type="rest")
+        self._append_stop("sleeper", CYCLE_RECOVERY_REST_HOURS, stop_type="rest")
         self.driving_since_reset = 0.0
         self.driving_since_break = 0.0
         self.cycle_hours_used = 0.0
 
-    def take_fuel_stop(self, latitude: float | None, longitude: float | None) -> None:
-        self._append(
-            "on_duty",
-            FUEL_STOP_HOURS,
-            stop_type="fuel",
-            latitude=latitude,
-            longitude=longitude,
-        )
+    def take_fuel_stop(self) -> None:
+        self._append_stop("on_duty", FUEL_STOP_HOURS, stop_type="fuel")
         self.next_fuel_at_miles += FUEL_INTERVAL_MILES
 
     def take_on_duty_stop(self, hours: float, stop_type: str) -> None:
-        self._append("on_duty", hours, stop_type=stop_type)
+        self._append_stop("on_duty", hours, stop_type=stop_type)
 
     def _miles_until_next_fuel(self) -> float | None:
         if self.odometer_miles >= self.next_fuel_at_miles:
@@ -182,12 +199,7 @@ class DriverSession:
                 remaining_hours -= fuel_hours
                 remaining_miles -= miles_until_fuel
 
-                fuel_point = point_at_trip_miles(
-                    self.combined_polyline,
-                    self.odometer_miles,
-                )
-                lat, lng = fuel_point if fuel_point else (None, None)
-                self.take_fuel_stop(lat, lng)
+                self.take_fuel_stop()
                 continue
 
             self._drive_chunk(max_chunk_hours, chunk_miles)

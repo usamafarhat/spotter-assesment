@@ -76,14 +76,28 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="-ml-1 size-9 p-1 active:scale-95"
+            className="-ml-1 size-9 shrink-0 p-1 active:scale-95"
             aria-label="Back to trips"
           >
             <ArrowLeft className="size-5" aria-hidden />
           </Button>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold leading-none text-foreground">Trip</h1>
-            <TripStatusBadge status={trip.status} showDot={false} />
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <h1 className="text-lg font-bold leading-none text-foreground">Trip</h1>
+              <TripStatusBadge status={trip.status} showDot={false} />
+            </div>
+            {hasDutySegments ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-auto shrink-0 whitespace-nowrap rounded-full border-slate-200/80 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-slate-100 active:bg-slate-200"
+                onClick={() => openLogsForTrip(trip.id)}
+              >
+                <FileText className="size-3.5 text-muted-foreground" aria-hidden />
+                View ELD logs
+              </Button>
+            ) : null}
           </div>
         </div>
       </header>
@@ -96,6 +110,7 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
             currentLocation={trip.current_location}
             pickupLocation={trip.pickup_location}
             deliveryLocation={trip.delivery_location}
+            dutySegments={trip.duty_segments}
             className="aspect-auto h-72 rounded-none border-0 border-b border-slate-200"
           />
         ) : (
@@ -238,9 +253,12 @@ export function TripDetailSkeleton({ onBack }: { onBack: () => void }) {
           >
             <ArrowLeft className="size-5" aria-hidden />
           </Button>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-5 w-10" />
-            <Skeleton className="h-5 w-16 rounded-full" />
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-10" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-8 w-28 rounded-full" />
           </div>
         </div>
       </header>

@@ -1,6 +1,7 @@
-import { GoogleMap, Marker, Polyline } from "@react-google-maps/api";
+import { GoogleMap, InfoWindow, Marker, Polyline } from "@react-google-maps/api";
 import { Loader2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { DutySegmentDto } from "@/api/EldPlanner/modules/trips/dutySegment.types";
 import type {
   LocationDto,
   RoutePolyline,
@@ -8,9 +9,12 @@ import type {
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { cn } from "@/lib/cn";
 import {
+  buildHosStopMarkers,
   buildTripRouteMarkers,
   createRouteMarkerIcon,
   hasRoutePolylines,
+  markerInfoWindowOffset,
+  markerZIndex,
   mergeRoutePolylines,
   polylineToPath,
   type RouteMapMarker,
@@ -49,6 +53,7 @@ type TripRouteMapProps = {
   currentLocation?: LocationDto;
   pickupLocation?: LocationDto;
   deliveryLocation?: LocationDto;
+  dutySegments?: DutySegmentDto[];
   markers?: RouteMapMarker[];
   className?: string;
 };
@@ -78,17 +83,23 @@ function fitMapToRoute(
   }
 }
 
+function markerKey(marker: RouteMapMarker): string {
+  return marker.id ?? `${marker.kind}-${marker.lat}-${marker.lng}`;
+}
+
 export function TripRouteMap({
   routeToPickupPolyline,
   routeToDeliveryPolyline,
   currentLocation,
   pickupLocation,
   deliveryLocation,
+  dutySegments,
   markers,
   className,
 }: TripRouteMapProps) {
   const { isLoaded, loadError } = useGoogleMaps();
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [selectedMarkerKey, setSelectedMarkerKey] = useState<string | null>(null);
 
   const pickupPath = useMemo(
     () => (routeToPickupPolyline?.length ? polylineToPath(routeToPickupPolyline) : []),
@@ -101,20 +112,38 @@ export function TripRouteMap({
     [routeToDeliveryPolyline],
   );
 
-  const combinedPath = useMemo(
-    () =>
-      polylineToPath(
-        mergeRoutePolylines(routeToPickupPolyline, routeToDeliveryPolyline),
-      ),
+  const combinedPolyline = useMemo(
+    () => mergeRoutePolylines(routeToPickupPolyline, routeToDeliveryPolyline),
     [routeToPickupPolyline, routeToDeliveryPolyline],
   );
 
+  const combinedPath = useMemo(
+    () => polylineToPath(combinedPolyline),
+    [combinedPolyline],
+  );
+
   const routeMarkers = useMemo(() => {
-    if (markers?.length) {
-      return markers;
-    }
-    return buildTripRouteMarkers(currentLocation, pickupLocation, deliveryLocation);
-  }, [markers, currentLocation, pickupLocation, deliveryLocation]);
+    const anchors = markers?.length
+      ? markers
+      : buildTripRouteMarkers(currentLocation, pickupLocation, deliveryLocation);
+    const stops = buildHosStopMarkers(dutySegments, combinedPolyline);
+    return [...stops, ...anchors];
+  }, [
+    markers,
+    currentLocation,
+    pickupLocation,
+    deliveryLocation,
+    dutySegments,
+    combinedPolyline,
+  ]);
+
+  const selectedMarker = useMemo(
+    () =>
+      selectedMarkerKey
+        ? routeMarkers.find((marker) => markerKey(marker) === selectedMarkerKey)
+        : undefined,
+    [routeMarkers, selectedMarkerKey],
+  );
 
   const markerIcons = useMemo(() => {
     if (!isLoaded) {
@@ -125,12 +154,25 @@ export function TripRouteMap({
       ["current", createRouteMarkerIcon("current")],
       ["pickup", createRouteMarkerIcon("pickup")],
       ["destination", createRouteMarkerIcon("destination")],
+      ["fuel", createRouteMarkerIcon("fuel")],
+      ["break", createRouteMarkerIcon("break")],
+      ["sleeper", createRouteMarkerIcon("sleeper")],
     ]);
   }, [isLoaded]);
+
+  const infoWindowOffset = useMemo(() => {
+    if (!isLoaded || !selectedMarker) {
+      return undefined;
+    }
+    return new google.maps.Size(0, markerInfoWindowOffset(selectedMarker.kind));
+  }, [isLoaded, selectedMarker]);
 
   const initialCenter = combinedPath[0] ?? DEFAULT_MAP_CENTER;
   const showPickupLeg = pickupPath.length > 0;
   const showDeliveryLeg = deliveryPath.length > 0;
+  const hasFuel = routeMarkers.some((marker) => marker.kind === "fuel");
+  const hasBreak = routeMarkers.some((marker) => marker.kind === "break");
+  const hasSleeper = routeMarkers.some((marker) => marker.kind === "sleeper");
 
   const handleMapLoad = useCallback(
     (map: google.maps.Map) => {
@@ -186,6 +228,7 @@ export function TripRouteMap({
             zoom={DEFAULT_MAP_ZOOM}
             options={mapOptions}
             onLoad={handleMapLoad}
+            onClick={() => setSelectedMarkerKey(null)}
           >
             {showPickupLeg && (
               <Polyline path={pickupPath} options={pickupLegPolylineOptions} />
@@ -194,50 +237,101 @@ export function TripRouteMap({
               <Polyline path={deliveryPath} options={deliveryLegPolylineOptions} />
             )}
 
-            {routeMarkers.map((marker) => (
-              <Marker
-                key={`${marker.kind}-${marker.lat}-${marker.lng}`}
-                position={marker}
-                title={marker.label}
-                icon={markerIcons.get(marker.kind)}
-              />
-            ))}
+            {routeMarkers.map((marker) => {
+              const key = markerKey(marker);
+              return (
+                <Marker
+                  key={key}
+                  position={marker}
+                  title={marker.label}
+                  icon={markerIcons.get(marker.kind)}
+                  zIndex={markerZIndex(marker.kind)}
+                  onClick={() => setSelectedMarkerKey(key)}
+                />
+              );
+            })}
+
+            {selectedMarker ? (
+              <InfoWindow
+                position={selectedMarker}
+                options={{ pixelOffset: infoWindowOffset }}
+                onCloseClick={() => setSelectedMarkerKey(null)}
+              >
+                <div className="max-w-48 px-0.5 py-0.5">
+                  <p className="text-xs font-semibold leading-snug text-foreground">
+                    {selectedMarker.label}
+                  </p>
+                  {selectedMarker.detail ? (
+                    <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">
+                      {selectedMarker.detail}
+                    </p>
+                  ) : null}
+                </div>
+              </InfoWindow>
+            ) : null}
           </GoogleMap>
 
-          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-3 rounded-full border border-slate-200/80 bg-white/95 px-3 py-1.5 text-[11px] font-medium text-foreground shadow-sm backdrop-blur-sm">
-            <span className="flex items-center gap-1.5">
+          <div className="pointer-events-none absolute bottom-3 left-3 flex max-w-[calc(100%-1.5rem)] flex-nowrap items-center gap-x-2 overflow-hidden whitespace-nowrap rounded-full border border-slate-200/80 bg-white/95 px-2.5 py-1 text-[10px] font-medium leading-none text-foreground shadow-sm backdrop-blur-sm">
+            <span className="flex items-center gap-1">
               <span
-                className="inline-block size-2.5 rounded-full bg-success"
+                className="inline-block size-2 shrink-0 rounded-full bg-success"
                 aria-hidden
               />
               Current
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1">
               <span
-                className="inline-block size-2.5 rounded-full bg-info"
+                className="inline-block size-2 shrink-0 rounded-full bg-info"
                 aria-hidden
               />
               Pickup
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1">
               <span
-                className="inline-block size-2.5 rounded-full bg-foreground"
+                className="inline-block size-2 shrink-0 rounded-full bg-foreground"
                 aria-hidden
               />
               Destination
             </span>
+            {hasFuel ? (
+              <span className="flex items-center gap-1">
+                <span
+                  className="inline-block size-1.5 shrink-0 rounded-full bg-warning"
+                  aria-hidden
+                />
+                Fuel
+              </span>
+            ) : null}
+            {hasBreak ? (
+              <span className="flex items-center gap-1">
+                <span
+                  className="inline-block size-1.5 shrink-0 rounded-full bg-cyan-600"
+                  aria-hidden
+                />
+                30 min
+              </span>
+            ) : null}
+            {hasSleeper ? (
+              <span className="flex items-center gap-1">
+                <span
+                  className="inline-block size-1.5 shrink-0 rounded-full bg-violet-600"
+                  aria-hidden
+                />
+                10 hr
+              </span>
+            ) : null}
             {showPickupLeg && showDeliveryLeg ? (
               <>
-                <span className="hidden items-center gap-1 sm:flex">
+                <span className="flex items-center gap-1">
                   <span
-                    className="inline-block h-0.5 w-3 rounded bg-info"
+                    className="inline-block h-0.5 w-2.5 shrink-0 rounded bg-info"
                     aria-hidden
                   />
                   To pickup
                 </span>
-                <span className="hidden items-center gap-1 sm:flex">
+                <span className="flex items-center gap-1">
                   <span
-                    className="inline-block h-0.5 w-3 rounded bg-foreground"
+                    className="inline-block h-0.5 w-2.5 shrink-0 rounded bg-foreground"
                     aria-hidden
                   />
                   To delivery

@@ -18,11 +18,33 @@ const STOP_TYPE_LABELS: Record<Exclude<StopType, "">, string> = {
   rest: "Rest break",
 };
 
+const LONG_REST_HOURS = 8;
+
+function segmentHours(segment: DutySegmentDto): number {
+  const start = new Date(segment.started_at).getTime();
+  const end = new Date(segment.ended_at).getTime();
+  return (end - start) / (1000 * 60 * 60);
+}
+
+/** 10 hr sleeper / cycle reset vs 30 min off-duty break. */
+export function isLongRest(segment: DutySegmentDto): boolean {
+  if (segment.stop_type !== "rest") {
+    return false;
+  }
+  if (segment.duty_status === "sleeper") {
+    return true;
+  }
+  return segmentHours(segment) >= LONG_REST_HOURS;
+}
+
 export function formatDutyStatus(status: DutyStatus): string {
   return DUTY_STATUS_LABELS[status];
 }
 
 export function formatSegmentTitle(segment: DutySegmentDto): string {
+  if (segment.stop_type === "rest") {
+    return isLongRest(segment) ? "10 hr rest" : "30 min break";
+  }
   if (segment.stop_type && segment.stop_type in STOP_TYPE_LABELS) {
     return STOP_TYPE_LABELS[segment.stop_type as Exclude<StopType, "">];
   }
@@ -65,8 +87,14 @@ export function segmentAccentClass(segment: DutySegmentDto): string {
   if (segment.stop_type === "delivery") {
     return "border border-border bg-secondary text-muted-foreground";
   }
-  if (segment.stop_type === "rest" || segment.duty_status === "sleeper") {
-    return "border border-border bg-muted text-muted-foreground";
+  if (segment.stop_type === "rest") {
+    if (isLongRest(segment)) {
+      return "border border-violet-600/20 bg-violet-50 text-violet-700";
+    }
+    return "border border-cyan-600/20 bg-cyan-50 text-cyan-700";
+  }
+  if (segment.duty_status === "sleeper") {
+    return "border border-violet-600/20 bg-violet-50 text-violet-700";
   }
   if (segment.duty_status === "driving") {
     return "border border-success/20 bg-success-subtle text-success";
