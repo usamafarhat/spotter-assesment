@@ -101,7 +101,7 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
         </div>
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-hidden">
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
         {hasRoute ? (
           <TripRouteMap
             routeToPickupPolyline={trip.route_to_pickup_polyline}
@@ -110,10 +110,10 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
             pickupLocation={trip.pickup_location}
             deliveryLocation={trip.delivery_location}
             dutySegments={trip.duty_segments}
-            className="aspect-auto h-72 shrink-0 rounded-none border-0 border-b border-slate-200"
+            className="aspect-auto h-72 shrink-0 rounded-none border-0 border-b border-slate-200 lg:h-full lg:min-h-0 lg:min-w-0 lg:flex-1 lg:border-b-0 lg:border-r"
           />
         ) : (
-          <div className="flex h-72 w-full shrink-0 flex-col items-center justify-center gap-2 border-b border-slate-200 bg-secondary px-6 text-center">
+          <div className="flex h-72 w-full shrink-0 flex-col items-center justify-center gap-2 border-b border-slate-200 bg-secondary px-6 text-center lg:h-auto lg:min-h-0 lg:flex-1 lg:border-b-0 lg:border-r">
             <Route className="size-6 text-muted-foreground" aria-hidden />
             <p className="text-sm font-medium text-foreground">No route to show</p>
             <p className="text-xs text-muted-foreground">
@@ -122,7 +122,7 @@ export function TripDetailView({ trip, onBack }: TripDetailViewProps) {
           </div>
         )}
 
-        <div className="space-y-6 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto">
+        <div className="space-y-6 p-4 lg:h-full lg:min-h-0 lg:w-[min(100%,28rem)] lg:shrink-0 lg:overflow-y-auto xl:w-lg xl:p-6">
           <section>
             <h2 className="text-base font-bold leading-snug text-foreground">
               {trip.pickup_location.address} → {trip.delivery_location.address}
@@ -263,12 +263,12 @@ export function TripDetailSkeleton({ onBack }: { onBack: () => void }) {
       </header>
 
       <div
-        className="flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden"
         aria-busy="true"
         aria-label="Loading trip"
       >
-        <Skeleton className="h-72 w-full shrink-0 rounded-none" />
-        <div className="space-y-6 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto">
+        <Skeleton className="h-72 w-full shrink-0 rounded-none lg:h-full lg:min-h-0 lg:flex-1" />
+        <div className="space-y-6 p-4 lg:h-full lg:min-h-0 lg:w-[min(100%,28rem)] lg:shrink-0 lg:overflow-y-auto xl:w-lg xl:p-6">
           <div className="space-y-2">
             <Skeleton className="h-5 w-full max-w-sm" />
             <Skeleton className="h-3 w-28" />

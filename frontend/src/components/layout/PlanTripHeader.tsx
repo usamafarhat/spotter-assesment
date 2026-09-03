@@ -9,14 +9,16 @@ type PlanTripHeaderProps = {
 export function PlanTripHeader({ onBack }: PlanTripHeaderProps) {
   return (
     <header className="shrink-0 border-b border-border bg-card px-4 py-3">
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+      <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack} aria-label="Go back">
           <ArrowLeft className="size-5" aria-hidden />
         </Button>
 
-        <p className="text-center text-base font-bold text-foreground">Spotter</p>
+        <p className="flex-1 text-center text-base font-bold text-foreground lg:text-left">
+          Plan a trip
+        </p>
 
-        <span className="justify-self-end" aria-label={`${DRIVER_NAME}'s profile`}>
+        <span className="lg:hidden" aria-label={`${DRIVER_NAME}'s profile`}>
           <ProfileAvatar size="sm" />
         </span>
       </div>

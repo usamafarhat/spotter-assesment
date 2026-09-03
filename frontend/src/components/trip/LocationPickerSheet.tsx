@@ -1,4 +1,4 @@
-import { ArrowLeft, Crosshair, Loader2 } from "lucide-react";
+import { ArrowLeft, Crosshair, Loader2, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { BottomSheet } from "../ui/BottomSheet";
@@ -95,20 +95,28 @@ function LocationPickerBody({
 
   return (
     <div className="flex max-h-[85vh] flex-col">
-      <div className="flex items-center gap-3 border-b border-border px-4 pb-3">
+      <div className="relative flex items-center justify-center border-b border-border px-4 py-3.5 lg:px-5 lg:py-4">
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={onClose}
-          className="size-9 p-0"
-          aria-label="Close location picker"
+          className="absolute left-3 lg:hidden"
+          aria-label="Go back"
         >
           <ArrowLeft className="size-5" aria-hidden />
         </Button>
-        <h2 className="flex-1 text-center text-base font-bold text-foreground">
+        <h2 className="px-12 text-center text-base font-bold text-foreground">
           {title}
         </h2>
-        <span className="size-9" aria-hidden />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="absolute right-3 hidden lg:inline-flex"
+          aria-label="Close location picker"
+        >
+          <X className="size-5" aria-hidden />
+        </Button>
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 pb-6">

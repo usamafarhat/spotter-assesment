@@ -38,17 +38,19 @@ export function LogsResultList({ groups, showTripTitles }: LogsResultListProps) 
             </div>
           ) : null}
 
-          {group.entries.map((entry) => {
-            const entryKey = `${entry.trip.id}-${entry.day.dateKey}`;
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {group.entries.map((entry) => {
+              const entryKey = `${entry.trip.id}-${entry.day.dateKey}`;
 
-            return (
-              <EldLogDayCard
-                key={entryKey}
-                entry={entry}
-                defaultExpanded={entryKey === firstEntryKey}
-              />
-            );
-          })}
+              return (
+                <EldLogDayCard
+                  key={entryKey}
+                  entry={entry}
+                  defaultExpanded={entryKey === firstEntryKey}
+                />
+              );
+            })}
+          </div>
         </section>
       ))}
     </div>

@@ -1,4 +1,4 @@
-import { Check, Search } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { TripResponseDto } from "@/api/EldPlanner/modules/trips/trips.types";
 import { Button } from "@/components/ui/Button";
@@ -66,17 +66,27 @@ export function TripPickerSheet({
         onClose();
       }}
     >
-      <div className="flex max-h-[85vh] flex-col px-5 pb-6">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
-          <div>
-            <h2 className="text-base font-bold text-foreground">Select trip</h2>
-            <p className="text-xs text-muted-foreground">
-              Pick one trip, or view every trip for a date.
-            </p>
-          </div>
-        </div>
+      <div className="relative flex flex-col items-center justify-center border-b border-border px-5 py-3.5 lg:py-4">
+        <h2 className="px-12 text-center text-base font-bold text-foreground">Select trip</h2>
+        <p className="mt-0.5 px-12 text-center text-xs text-muted-foreground">
+          Pick one trip, or view every trip for a date.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setQuery("");
+            onClose();
+          }}
+          className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+          aria-label="Close trip picker"
+        >
+          <X className="size-5" aria-hidden />
+        </button>
+      </div>
 
-        <div className="relative mt-3">
+      <div className="flex max-h-[85vh] flex-col px-5 pt-4 pb-6">
+
+        <div className="relative">
           <Search
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden

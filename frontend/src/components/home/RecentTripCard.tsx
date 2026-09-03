@@ -14,7 +14,7 @@ export function RecentTripCard({ trip }: RecentTripCardProps) {
     <button
       type="button"
       onClick={() => openTripDetail(trip.id)}
-      className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="flex h-full w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <div className="flex min-w-0 items-center gap-3.5">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -23,9 +23,12 @@ export function RecentTripCard({ trip }: RecentTripCardProps) {
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-tight text-foreground">
-            {trip.origin} → {trip.destination}
+            {trip.origin}
           </p>
-          <div className="mt-1 flex items-center gap-2">
+          <p className="mt-0.5 truncate text-sm font-medium leading-tight text-muted-foreground">
+            to {trip.destination}
+          </p>
+          <div className="mt-1.5 flex items-center gap-2">
             <span className="text-xs font-normal text-muted-foreground">
               {trip.dateLabel}
             </span>

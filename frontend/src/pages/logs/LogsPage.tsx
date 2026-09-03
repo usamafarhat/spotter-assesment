@@ -22,6 +22,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useNavigation } from "@/context/useNavigation";
+import { PAGE_GUTTER_CLASS } from "@/lib/appShell";
+import { cn } from "@/lib/cn";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { tripFilterLabel } from "@/lib/tripDisplay";
 
@@ -108,10 +110,10 @@ export default function LogsPage() {
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <header className="shrink-0 border-b border-slate-100">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white lg:bg-transparent">
+      <header className="shrink-0 border-b border-slate-100 bg-white">
         <AppHeader />
-        <div className="space-y-3 px-4 pt-4 pb-3">
+        <div className={cn(PAGE_GUTTER_CLASS, "space-y-3 pt-4 pb-3 lg:pt-8")}>
           <section>
             <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">
               Logs
@@ -141,55 +143,57 @@ export default function LogsPage() {
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-        {isError && (
-          <Alert variant="error">
-            <AlertTitle>Could not load trips</AlertTitle>
-            <AlertDescription className="flex flex-col gap-2">
-              <span>{getErrorMessage(error, LOAD_ERROR_MESSAGE)}</span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-              >
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className={cn(PAGE_GUTTER_CLASS, "py-4")}>
+          {isError && (
+            <Alert variant="error">
+              <AlertTitle>Could not load trips</AlertTitle>
+              <AlertDescription className="flex flex-col gap-2">
+                <span>{getErrorMessage(error, LOAD_ERROR_MESSAGE)}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetch()}
+                >
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {isLoading ? (
-          <div className="space-y-4" aria-busy="true" aria-label="Loading logs">
-            <Skeleton className="h-36 w-full rounded-2xl" />
-            <Skeleton className="h-36 w-full rounded-2xl" />
-          </div>
-        ) : trips.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-            <p className="text-sm font-medium text-foreground">No trips yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Plan a trip first to generate ELD log sheets.
-            </p>
-            <Button className="mt-4 rounded-xl" onClick={openPlanTrip}>
-              Plan New Trip
-            </Button>
-          </div>
-        ) : groups.length > 0 ? (
-          <LogsResultList groups={groups} showTripTitles={selectedTripId == null} />
-        ) : (
-          <div className="rounded-2xl border border-dashed border-border bg-secondary/40 px-4 py-8 text-center">
-            <p className="text-sm font-medium text-foreground">
-              No ELD logs for this filter
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {selectedDateKey && selectedTripId == null
-                ? "No trips have a log on this date."
-                : selectedDateKey
-                  ? "This trip has no log on that date. Clear the date or pick another day."
-                  : "This trip has no duty segments yet."}
-            </p>
-          </div>
-        )}
+          {isLoading ? (
+            <div className="space-y-4" aria-busy="true" aria-label="Loading logs">
+              <Skeleton className="h-36 w-full rounded-2xl" />
+              <Skeleton className="h-36 w-full rounded-2xl" />
+            </div>
+          ) : trips.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+              <p className="text-sm font-medium text-foreground">No trips yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Plan a trip first to generate ELD log sheets.
+              </p>
+              <Button className="mt-4 rounded-xl" onClick={openPlanTrip}>
+                Plan New Trip
+              </Button>
+            </div>
+          ) : groups.length > 0 ? (
+            <LogsResultList groups={groups} showTripTitles={selectedTripId == null} />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-secondary/40 px-4 py-8 text-center">
+              <p className="text-sm font-medium text-foreground">
+                No ELD logs for this filter
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {selectedDateKey && selectedTripId == null
+                  ? "No trips have a log on this date."
+                  : selectedDateKey
+                    ? "This trip has no log on that date. Clear the date or pick another day."
+                    : "This trip has no duty segments yet."}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {trips.length > 0 ? (

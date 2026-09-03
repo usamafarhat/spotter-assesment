@@ -7,7 +7,7 @@ type PlanTripCardProps = {
 
 export function PlanTripCard({ onPlanTrip }: PlanTripCardProps) {
   return (
-    <section className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+    <section className="flex h-full flex-col gap-5 rounded-2xl border border-border bg-card p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
       <div className="flex items-start gap-3.5">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
           <MapPinned className="size-5" aria-hidden />
@@ -24,7 +24,7 @@ export function PlanTripCard({ onPlanTrip }: PlanTripCardProps) {
 
       <Button
         size="lg"
-        className="h-12 w-full rounded-full text-[15px] font-semibold shadow-sm"
+        className="mt-auto h-12 w-full rounded-full text-[15px] font-semibold shadow-sm"
         onClick={onPlanTrip}
       >
         <Plus className="size-5 shrink-0" aria-hidden />

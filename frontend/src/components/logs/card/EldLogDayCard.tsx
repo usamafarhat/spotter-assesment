@@ -34,7 +34,7 @@ export function EldLogDayCard({ entry, defaultExpanded = false }: EldLogDayCardP
     <article
       className={cn(
         "overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.03)]",
-        expanded && "shadow-[0_2px_10px_rgba(0,0,0,0.04)]",
+        expanded && "shadow-[0_2px_10px_rgba(0,0,0,0.04)] lg:col-span-2",
       )}
     >
       <div className="space-y-3 p-4">

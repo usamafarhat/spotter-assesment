@@ -6,6 +6,8 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { useNavigation } from "@/context/useNavigation";
+import { PAGE_GUTTER_CLASS, TRIP_CARD_GRID_CLASS } from "@/lib/appShell";
+import { cn } from "@/lib/cn";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { toTripListItem } from "@/lib/tripDisplay";
 
@@ -21,10 +23,10 @@ export default function TripsPage() {
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       <AppHeader />
 
-      <div className="flex flex-1 flex-col gap-6 px-5 pb-4 pt-5">
+      <div className={cn(PAGE_GUTTER_CLASS, "flex flex-1 flex-col gap-6 pb-4 pt-5 lg:py-8")}>
         <section className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground lg:text-[28px]">
               Trips
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -33,7 +35,7 @@ export default function TripsPage() {
           </div>
           <Button
             size="sm"
-            className="h-auto shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold"
+            className="h-auto shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold lg:hidden"
             onClick={openPlanTrip}
           >
             <Plus className="size-3.5 shrink-0" aria-hidden />
@@ -58,13 +60,19 @@ export default function TripsPage() {
           </Alert>
         )}
 
-        <section aria-label="List of planned and completed trips" className="space-y-3">
+        <section aria-label="List of planned and completed trips">
           {isLoading ? (
-            Array.from({ length: 4 }).map((_, index) => (
-              <RecentTripCardSkeleton key={index} />
-            ))
+            <div className={TRIP_CARD_GRID_CLASS}>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <RecentTripCardSkeleton key={index} />
+              ))}
+            </div>
           ) : tripItems.length > 0 ? (
-            tripItems.map((trip) => <RecentTripCard key={trip.id} trip={trip} />)
+            <div className={TRIP_CARD_GRID_CLASS}>
+              {tripItems.map((trip) => (
+                <RecentTripCard key={trip.id} trip={trip} />
+              ))}
+            </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
               <p className="text-sm font-medium text-foreground">No trips yet</p>

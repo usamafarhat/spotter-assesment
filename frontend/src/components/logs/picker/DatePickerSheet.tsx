@@ -47,21 +47,22 @@ export function DatePickerSheet({
 
   return (
     <BottomSheet open={open} onClose={onClose}>
-      <div className="space-y-4 px-5 pb-6">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
-          <div>
-            <h2 className="text-base font-bold text-foreground">Select daily log</h2>
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
-            aria-label="Close date picker"
-          >
-            <X className="size-4" aria-hidden />
-          </button>
-        </div>
+      <div className="relative flex flex-col items-center justify-center border-b border-border px-5 py-3.5 lg:py-4">
+        <h2 className="px-12 text-center text-base font-bold text-foreground">
+          Select daily log
+        </h2>
+        <p className="mt-0.5 px-12 text-center text-xs text-muted-foreground">{subtitle}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+          aria-label="Close date picker"
+        >
+          <X className="size-5" aria-hidden />
+        </button>
+      </div>
+
+      <div className="space-y-4 px-5 pt-4 pb-6">
 
         <div className="flex items-center justify-between px-1">
           <button
@@ -142,7 +143,7 @@ export function DatePickerSheet({
             {draftDateKey ? (
               <button
                 type="button"
-                className="text-xs font-bold text-slate-600 hover:text-slate-800"
+                className="text-xs font-bold text-slate-600 hover:text-slate-900 hover:[background-image:none] active:[background-image:none]"
                 onClick={() => setDraftDateKey(null)}
               >
                 Clear date
@@ -150,7 +151,7 @@ export function DatePickerSheet({
             ) : null}
             <button
               type="button"
-              className="text-xs font-bold text-blue-600 hover:text-blue-700"
+              className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:[background-image:none] active:[background-image:none]"
               onClick={() => {
                 setVisibleMonth({
                   year: new Date().getFullYear(),

@@ -3,7 +3,7 @@ import { DRIVER_NAME, ProfileAvatar } from "./ProfileAvatar";
 
 export function AppHeader() {
   return (
-    <header className="w-full border-b border-slate-100 bg-white">
+    <header className="w-full border-b border-slate-100 bg-white lg:hidden">
       <div className="flex items-center justify-between px-5 pb-2 pt-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
@@ -11,7 +11,7 @@ export function AppHeader() {
           </div>
           <div className="flex min-w-0 flex-col">
             <p className="truncate text-[17px] font-bold leading-tight tracking-tight text-foreground">
-              Spotter
+              ELD Planner
             </p>
             <p className="mt-0.5 truncate text-xs font-medium leading-tight text-muted-foreground">
               Trip Planner & ELD Logs

@@ -1,27 +1,13 @@
-import { History, LayoutGrid, Route } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useNavigation } from "../../context/useNavigation";
-import type { AppTab } from "../../types/navigation";
-
-type TabConfig = {
-  id: AppTab;
-  label: string;
-  icon: LucideIcon;
-};
-
-const tabs: TabConfig[] = [
-  { id: "trips", label: "Trip", icon: Route },
-  { id: "home", label: "Dashboard", icon: LayoutGrid },
-  { id: "logs", label: "Logs", icon: History },
-];
+import { MOBILE_NAV_TABS, type NavTabConfig } from "./navTabs";
 
 function TabButton({
   tab,
   isActive,
   onSelect,
 }: {
-  tab: TabConfig;
+  tab: NavTabConfig;
   isActive: boolean;
   onSelect: () => void;
 }) {
@@ -70,11 +56,11 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="shrink-0 border-t border-[#f1f5f9] bg-card pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.02)]"
+      className="shrink-0 border-t border-[#f1f5f9] bg-card pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.02)] lg:hidden"
       aria-label="Main navigation"
     >
       <div className="flex h-16 items-stretch">
-        {tabs.map((tab) => (
+        {MOBILE_NAV_TABS.map((tab) => (
           <TabButton
             key={tab.id}
             tab={tab}
