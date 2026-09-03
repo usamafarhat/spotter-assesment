@@ -32,6 +32,3 @@ export const tripFormSchema = Yup.object({
     .min(0, "Must be at least 0 hours")
     .max(MAX_CYCLE_HRS, `Cannot exceed ${MAX_CYCLE_HRS} hours`),
 });
-
-export const CYCLE_FULLY_UTILIZED_ERROR =
-  "Your 70 hr / 8-day cycle is fully used. You cannot plan a new trip until hours are available again.";

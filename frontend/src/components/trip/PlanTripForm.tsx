@@ -6,11 +6,7 @@ import { useNavigation } from "@/context/NavigationContext";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { applyTripApiFieldErrors } from "@/lib/tripApiErrors";
 import { toCreateTripDto } from "@/lib/tripFormMapper";
-import {
-  CYCLE_FULLY_UTILIZED_ERROR,
-  MAX_CYCLE_HRS,
-  tripFormSchema,
-} from "../../lib/tripFormValidation";
+import { tripFormSchema } from "../../lib/tripFormValidation";
 import {
   emptyTripFormValues,
   type LocationFieldKey,
@@ -42,13 +38,6 @@ export function PlanTripForm() {
     values: TripFormValues,
     { setSubmitting, setFieldError }: FormikHelpers<TripFormValues>,
   ) {
-    const hoursUsed = parseFloat(values.currentCycleUsedHrs);
-    if (!Number.isNaN(hoursUsed) && hoursUsed >= MAX_CYCLE_HRS) {
-      setGlobalError(CYCLE_FULLY_UTILIZED_ERROR);
-      setSubmitting(false);
-      return;
-    }
-
     setGlobalError(undefined);
 
     try {

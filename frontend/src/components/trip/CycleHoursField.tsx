@@ -79,10 +79,20 @@ export function CycleHoursField({
             />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {hoursRemaining.toFixed(1)} hrs
-            </span>{" "}
-            remaining in this cycle
+            {hoursRemaining <= 0 ? (
+              <>
+                Cycle is full. The plan starts with a{" "}
+                <span className="font-medium text-foreground">10 hr rest</span> to
+                reset hours, then continues.
+              </>
+            ) : (
+              <>
+                <span className="font-medium text-foreground">
+                  {hoursRemaining.toFixed(1)} hrs
+                </span>{" "}
+                remaining in this cycle
+              </>
+            )}
           </p>
         </div>
       )}

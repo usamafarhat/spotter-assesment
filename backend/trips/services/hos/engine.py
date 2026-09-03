@@ -133,11 +133,22 @@ class DriverSession:
         self.driving_since_break = 0.0
         self.cycle_hours_used = 0.0
 
+    def ensure_cycle_available(self, upcoming_hours: float = 0.0) -> None:
+        """Insert a cycle-recovery rest if the 70 hr cap would be exceeded."""
+        remaining = CYCLE_MAX_HOURS - self.cycle_hours_used
+        if remaining <= HOUR_EPSILON:
+            self.take_cycle_recovery()
+            return
+        if upcoming_hours > HOUR_EPSILON and remaining < upcoming_hours - HOUR_EPSILON:
+            self.take_cycle_recovery()
+
     def take_fuel_stop(self) -> None:
+        self.ensure_cycle_available(FUEL_STOP_HOURS)
         self._append_stop("on_duty", FUEL_STOP_HOURS, stop_type="fuel")
         self.next_fuel_at_miles += FUEL_INTERVAL_MILES
 
     def take_on_duty_stop(self, hours: float, stop_type: str) -> None:
+        self.ensure_cycle_available(hours)
         self._append_stop("on_duty", hours, stop_type=stop_type)
 
     def _miles_until_next_fuel(self) -> float | None:
@@ -235,10 +246,11 @@ def build_hos_plan(
 ) -> HosPlan:
     """
     Build duty timeline:
-      1. Drive current → pickup (may be 0 if same location)
-      2. 1h on duty at pickup
-      3. Drive pickup → delivery
-      4. 1h on duty at delivery
+      1. 10h cycle recovery if the 70 hr window is already full
+      2. Drive current → pickup (may be 0 if same location)
+      3. 1h on duty at pickup
+      4. Drive pickup → delivery
+      5. 1h on duty at delivery
     """
     combined_polyline = merge_polylines(
         route_to_pickup_polyline,
@@ -251,6 +263,7 @@ def build_hos_plan(
         combined_polyline=combined_polyline,
     )
 
+    session.ensure_cycle_available()
     session.drive_hours(leg_to_pickup_hours, leg_to_pickup_miles)
     session.take_on_duty_stop(PICKUP_ON_DUTY_HOURS, stop_type="pickup")
     session.drive_hours(leg_to_delivery_hours, leg_to_delivery_miles)
