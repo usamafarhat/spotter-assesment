@@ -173,6 +173,61 @@ export function buildEldStepPoints(blocks: EldLogBlock[]): EldStepPoint[] {
   return points;
 }
 
+const GAP_EPSILON_MINUTES = 0.01;
+
+/**
+ * FMCSA daily logs must cover midnight–midnight. The HOS engine only emits
+ * trip activity, so pad unlogged time as off duty.
+ */
+function fillCalendarDayBlocks(dayKey: string, blocks: EldLogBlock[]): EldLogBlock[] {
+  const sorted = [...blocks]
+    .map((block) => ({
+      ...block,
+      startMinute: Math.max(0, Math.min(MINUTES_PER_DAY, block.startMinute)),
+      endMinute: Math.max(0, Math.min(MINUTES_PER_DAY, block.endMinute)),
+    }))
+    .filter((block) => block.endMinute > block.startMinute)
+    .sort((a, b) => a.startMinute - b.startMinute);
+
+  if (!sorted.length) {
+    return [
+      {
+        id: `gap-off_duty-${dayKey}-0`,
+        dutyStatus: "off_duty",
+        startMinute: 0,
+        endMinute: MINUTES_PER_DAY,
+      },
+    ];
+  }
+
+  const filled: EldLogBlock[] = [];
+  let cursor = 0;
+
+  for (const block of sorted) {
+    if (block.startMinute - cursor > GAP_EPSILON_MINUTES) {
+      filled.push({
+        id: `gap-off_duty-${dayKey}-${cursor}`,
+        dutyStatus: "off_duty",
+        startMinute: cursor,
+        endMinute: block.startMinute,
+      });
+    }
+    filled.push(block);
+    cursor = Math.max(cursor, block.endMinute);
+  }
+
+  if (MINUTES_PER_DAY - cursor > GAP_EPSILON_MINUTES) {
+    filled.push({
+      id: `gap-off_duty-${dayKey}-${cursor}`,
+      dutyStatus: "off_duty",
+      startMinute: cursor,
+      endMinute: MINUTES_PER_DAY,
+    });
+  }
+
+  return filled;
+}
+
 export function buildEldLogDays(segments: DutySegmentDto[]): EldLogDay[] {
   if (!segments.length) {
     return [];
@@ -244,7 +299,7 @@ export function buildEldLogDays(segments: DutySegmentDto[]): EldLogDay[] {
   return [...blocksByDay.keys()].sort().map((key) => ({
     dateKey: key,
     dateLabel: formatLogDayLabel(key),
-    blocks: blocksByDay.get(key) ?? [],
+    blocks: fillCalendarDayBlocks(key, blocksByDay.get(key) ?? []),
     remarks: (remarksByDay.get(key) ?? []).sort((a, b) => a.minute - b.minute),
   }));
 }
