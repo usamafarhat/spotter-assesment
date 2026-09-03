@@ -7,7 +7,7 @@ type PlanTripHeaderProps = {
 
 export function PlanTripHeader({ onBack }: PlanTripHeaderProps) {
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3">
+    <header className="shrink-0 border-b border-border bg-card px-4 py-3">
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
         <Button
           variant="ghost"
@@ -19,7 +19,7 @@ export function PlanTripHeader({ onBack }: PlanTripHeaderProps) {
           <ArrowLeft className="size-5" aria-hidden />
         </Button>
 
-        <p className="text-center text-base font-bold text-foreground">Hauler ELD</p>
+        <p className="text-center text-base font-bold text-foreground">Spotter</p>
 
         <div
           className="flex size-9 items-center justify-center rounded-full bg-secondary"

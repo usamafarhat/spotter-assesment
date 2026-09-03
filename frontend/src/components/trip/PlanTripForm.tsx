@@ -107,9 +107,9 @@ export function PlanTripForm() {
           : (values.pickupLocation?.address ?? "");
 
         return (
-          <>
-            <Form className="flex flex-1 flex-col">
-              <div className="flex flex-1 flex-col gap-6 px-5 pt-6 pb-28">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <Form className="flex min-h-0 flex-1 flex-col">
+              <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pt-6 pb-6">
                 <section>
                   <h1 className="text-2xl font-bold tracking-tight text-foreground">
                     Plan a New Trip
@@ -150,37 +150,41 @@ export function PlanTripForm() {
                         showError={showValidationErrors && !values.pickupSameAsCurrent}
                         disabled={values.pickupSameAsCurrent}
                         onClick={() => setActiveLocationField("pickupLocation")}
+                        trailing={
+                          <label
+                            className={cn(
+                              "flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm",
+                              !values.currentLocation && "cursor-not-allowed opacity-60",
+                            )}
+                          >
+                            <input
+                              type="checkbox"
+                              className="size-4 rounded border-input accent-info"
+                              checked={values.pickupSameAsCurrent}
+                              disabled={!values.currentLocation}
+                              onChange={(event) => {
+                                const checked = event.target.checked;
+                                void setFieldValue("pickupSameAsCurrent", checked);
+                                void setFieldError("pickupLocation", undefined);
+                                setGlobalError(undefined);
+
+                                if (checked && values.currentLocation) {
+                                  void setFieldValue(
+                                    "pickupLocation",
+                                    values.currentLocation,
+                                  );
+                                }
+                              }}
+                            />
+                            <span
+                              className="whitespace-nowrap text-foreground"
+                              title="Same as current location"
+                            >
+                              Same as current
+                            </span>
+                          </label>
+                        }
                       />
-
-                      <label
-                        className={cn(
-                          "flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-secondary/50 px-3 py-2.5 text-sm",
-                          !values.currentLocation && "cursor-not-allowed opacity-60",
-                        )}
-                      >
-                        <input
-                          type="checkbox"
-                          className="size-4 rounded border-input accent-info"
-                          checked={values.pickupSameAsCurrent}
-                          disabled={!values.currentLocation}
-                          onChange={(event) => {
-                            const checked = event.target.checked;
-                            void setFieldValue("pickupSameAsCurrent", checked);
-                            void setFieldError("pickupLocation", undefined);
-                            setGlobalError(undefined);
-
-                            if (checked && values.currentLocation) {
-                              void setFieldValue(
-                                "pickupLocation",
-                                values.currentLocation,
-                              );
-                            }
-                          }}
-                        />
-                        <span className="text-foreground">
-                          Same as current location
-                        </span>
-                      </label>
 
                       {values.pickupSameAsCurrent && values.currentLocation && (
                         <p className="text-xs text-muted-foreground">
@@ -227,23 +231,21 @@ export function PlanTripForm() {
                 </section>
               </div>
 
-              <div className="fixed inset-x-0 bottom-20 z-10 px-5">
-                <div className="mx-auto max-w-md">
-                  <Button
-                    type="button"
-                    size="lg"
-                    className="h-12 w-full rounded-xl"
-                    disabled={isSubmitting || createTrip.isPending}
-                    onClick={async () => {
-                      setShowValidationErrors(true);
-                      await submitForm();
-                    }}
-                  >
-                    {isSubmitting || createTrip.isPending
-                      ? "Generating Plan..."
-                      : "Generate Plan"}
-                  </Button>
-                </div>
+              <div className="shrink-0 border-t border-border bg-card px-5 pt-3 pb-4">
+                <Button
+                  type="button"
+                  size="lg"
+                  className="h-12 w-full rounded-xl"
+                  disabled={isSubmitting || createTrip.isPending}
+                  onClick={async () => {
+                    setShowValidationErrors(true);
+                    await submitForm();
+                  }}
+                >
+                  {isSubmitting || createTrip.isPending
+                    ? "Generating Plan..."
+                    : "Generate Plan"}
+                </Button>
               </div>
             </Form>
 
@@ -264,7 +266,7 @@ export function PlanTripForm() {
                 }
               }}
             />
-          </>
+          </div>
         );
       }}
     </Formik>

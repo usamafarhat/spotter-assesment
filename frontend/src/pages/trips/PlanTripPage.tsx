@@ -6,7 +6,7 @@ export default function PlanTripPage() {
   const { closePlanTrip } = useNavigation();
 
   return (
-    <div className="flex flex-1 flex-col bg-card">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-card">
       <PlanTripHeader onBack={closePlanTrip} />
       <PlanTripForm />
     </div>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { APP_SHELL_WIDTH_CLASS } from "../../lib/appShell";
 import { cn } from "../../lib/cn";
 
 type BottomSheetProps = {
@@ -24,7 +25,8 @@ export function BottomSheet({ open, onClose, children, className }: BottomSheetP
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative z-10 flex max-h-[92vh] w-full max-w-md flex-col rounded-t-3xl bg-card shadow-2xl",
+          "relative z-10 flex max-h-[92vh] flex-col rounded-t-3xl bg-card shadow-2xl",
+          APP_SHELL_WIDTH_CLASS,
           className,
         )}
       >

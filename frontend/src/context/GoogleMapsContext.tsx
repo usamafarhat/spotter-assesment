@@ -13,7 +13,7 @@ const GoogleMapsContext = createContext<GoogleMapsContextValue>({
 
 export function GoogleMapsProvider({ children }: { children: ReactNode }) {
   const { isLoaded, loadError } = useJsApiLoader({
-    id: "hauler-eld-google-maps",
+    id: "spotter-eld-google-maps",
     googleMapsApiKey: getGoogleMapsApiKey(),
     libraries: GOOGLE_MAPS_LIBRARIES,
   });

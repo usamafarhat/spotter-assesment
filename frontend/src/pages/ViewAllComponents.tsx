@@ -45,7 +45,7 @@ export default function ViewAllComponents() {
             Component Library
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            Base UI primitives for the ELD Trip Planner app.
+            Base UI primitives for the Spotter ELD Trip Planner app.
           </p>
         </div>
       </header>

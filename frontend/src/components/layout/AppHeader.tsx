@@ -10,10 +10,10 @@ export function AppHeader() {
           </div>
           <div className="flex min-w-0 flex-col">
             <p className="truncate text-[17px] font-bold leading-tight tracking-tight text-foreground">
-              Hauler ELD
+              Spotter
             </p>
             <p className="mt-0.5 truncate text-xs font-medium leading-tight text-muted-foreground">
-              Smart Logistics &amp; Compliance
+              Trip Planner &amp; ELD Logs
             </p>
           </div>
         </div>
